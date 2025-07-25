@@ -1,0 +1,23 @@
+# Core dependencies for Cerberus-SAST
+# Basic CLI and data handling
+click>=8.1.0
+pyyaml>=6.0.0
+pydantic>=2.0.0
+
+# Terminal output and user interface
+rich>=13.0.0
+colorama>=0.4.0
+
+# Code parsing and AST generation
+tree-sitter>=0.20.0
+
+# Language-specific tree-sitter parsers
+# Note: Install these based on languages you want to support
+tree-sitter-c>=0.20.0
+tree-sitter-cpp>=0.20.0
+tree-sitter-python>=0.20.0
+tree-sitter-javascript>=0.20.0
+tree-sitter-java>=0.20.0
+
+# Optional: Additional utilities
+fnmatch2>=0.3.0
