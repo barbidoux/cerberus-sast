@@ -1,0 +1,151 @@
+# Workflow GitHub Actions pour build et publication Docker
+name: Docker Build and Publish
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Test de l'image Docker
+  test-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: docker build -t cerberus-sast:test .
+      
+      - name: Test Docker image
+        run: |
+          # Test de base - aide
+          docker run --rm cerberus-sast:test --help
+          
+          # Test des commandes
+          docker run --rm cerberus-sast:test rules --help
+          docker run --rm cerberus-sast:test doctor
+          
+          # Test de la démonstration
+          mkdir -p output
+          docker run --rm -v $(pwd)/output:/output cerberus-sast:test /usr/local/bin/run-example.sh
+          
+          # Vérifier que les fichiers de sortie sont créés
+          test -f output/report.json || exit 1
+          test -f output/report.sarif || exit 1
+          test -f output/baseline.json || exit 1
+          
+          echo "✅ Tests Docker réussis"
+
+  # Build et publication de l'image
+  build-and-push:
+    needs: test-docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Test published image
+        run: |
+          # Test de l'image publiée
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          docker run --rm $IMAGE_TAG --help
+          
+          echo "✅ Image publiée testée avec succès"
+
+  # Sécurité et scan de l'image
+  security-scan:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Mise à jour de la documentation
+  update-docs:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update README with latest tag
+        run: |
+          # Obtenir le dernier tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "latest")
+          
+          # Mettre à jour le README si nécessaire
+          sed -i "s|cerberus-sast:.*|cerberus-sast:$LATEST_TAG|g" README.md
+          
+          # Commit si des changements ont été faits
+          if git diff --quiet; then
+            echo "Aucun changement dans le README"
+          else
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add README.md
+            git commit -m "docs: mise à jour de la version Docker dans README [skip ci]"
+            git push
+          fi

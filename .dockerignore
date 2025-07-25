@@ -1,0 +1,114 @@
+# Dockerignore pour Cerberus-SAST
+# Exclut les fichiers non nécessaires de l'image Docker
+
+# Git et contrôle de version
+.git/
+.gitignore
+.gitattributes
+
+# Environnements virtuels Python
+venv/
+env/
+.env
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Cache et fichiers temporaires
+.cache/
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDEs et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Output et rapports de test
+output/
+reports/
+test-results/
+htmlcov/
+
+# Cache Cerberus-SAST
+.cerberus_cache/
+
+# Fichiers de configuration locaux
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Fichiers de backup
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# Documentation build
+docs/_build/
+site/
+
+# Node.js (si présent)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Autres
+*.md
+!README.md
+LICENSE
+CHANGELOG*
+CONTRIBUTING*

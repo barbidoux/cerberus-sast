@@ -1,0 +1,100 @@
+# Docker Compose pour Cerberus-SAST
+# Facilite le développement et les tests locaux
+
+version: '3.8'
+
+services:
+  # Service principal Cerberus-SAST
+  cerberus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cerberus-sast:latest
+    container_name: cerberus-sast
+    volumes:
+      # Montage du workspace pour analyser du code externe
+      - ./workspace:/workspace:ro
+      # Montage du répertoire de sortie
+      - ./output:/output
+      # Montage optionnel de configuration personnalisée
+      - ./.cerberus.yml:/app/.cerberus.yml:ro
+    environment:
+      - CERBERUS_OUTPUT=/output
+      - PYTHONUNBUFFERED=1
+    # Commande par défaut: scan du workspace
+    command: scan /workspace --format json --output /output/results.json
+  
+  # Service pour la démonstration
+  demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cerberus-sast:latest
+    container_name: cerberus-demo
+    volumes:
+      - ./output:/output
+    environment:
+      - CERBERUS_OUTPUT=/output
+    # Exécute le script de démonstration
+    command: /usr/local/bin/run-example.sh
+  
+  # Service interactif pour développement
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cerberus-sast:latest
+    container_name: cerberus-dev
+    volumes:
+      # Montage du code source pour développement
+      - .:/app:rw
+      - ./output:/output
+    environment:
+      - CERBERUS_OUTPUT=/output
+      - PYTHONPATH=/app
+    # Mode interactif
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+  
+  # Service pour tests automatisés
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cerberus-sast:latest
+    container_name: cerberus-test
+    volumes:
+      - .:/app:ro
+      - ./output:/output
+    environment:
+      - CERBERUS_OUTPUT=/output
+      - PYTHONPATH=/app
+    # Exécute les tests
+    command: python -m pytest tests/ -v
+  
+  # Service pour génération de documentation
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cerberus-sast:latest
+    container_name: cerberus-docs
+    volumes:
+      - .:/app:ro
+      - ./docs:/output
+    working_dir: /app
+    # Génère la documentation
+    command: bash -c "cerberus rules > /output/rules.txt && cerberus doctor > /output/system-info.txt"
+
+# Volumes nommés pour persistance
+volumes:
+  cerberus_cache:
+    driver: local
+  cerberus_output:
+    driver: local
+
+# Réseau pour isolation
+networks:
+  cerberus_network:
+    driver: bridge

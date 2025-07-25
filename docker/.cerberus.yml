@@ -1,0 +1,79 @@
+# Configuration Cerberus-SAST pour démonstration Docker
+version: "1.0"
+
+# Configuration du scan
+scan:
+  # Chemins à exclure du scan
+  exclude_paths:
+    - "*.tmp"
+    - "*.log"
+    - ".git/**"
+    - "__pycache__/**"
+    - "node_modules/**"
+    - "build/**"
+    - "dist/**"
+  
+  # Chemins à inclure (patterns glob)
+  include_paths:
+    - "**/*.c"
+    - "**/*.h"
+    - "**/*.cpp"
+    - "**/*.hpp"
+  
+  # Sévérité minimale pour faire échouer le scan
+  fail_on_severity: "HIGH"
+  
+  # Taille maximale des fichiers à analyser (en MB)
+  max_file_size_mb: 10
+  
+  # Utilisation du cache pour améliorer les performances
+  cache_enabled: true
+  
+  # Nombre de workers parallèles (auto-détection si non spécifié)
+  # parallel_workers: 4
+
+# Configuration des plugins
+plugins:
+  # Plugin C/C++
+  c:
+    enabled: true
+    options:
+      # Standard C à utiliser pour l'analyse
+      c_standard: "c11"
+      # Règles personnalisées additionnelles
+      custom_rules: []
+    rulesets:
+      security:
+        enabled: true
+        severity_threshold: "LOW"
+      performance:
+        enabled: false
+
+# Configuration des rapports
+reporting:
+  # Formats de sortie supportés: sarif, json, html, console
+  default_format: "json"
+  
+  # Options pour le format SARIF
+  sarif:
+    # Version du schéma SARIF
+    version: "2.1.0"
+    # Informations sur l'outil
+    tool_info:
+      name: "Cerberus-SAST"
+      version: "1.0.0"
+      uri: "https://github.com/barbidoux/cerberus-sast"
+  
+  # Options pour le format JSON
+  json:
+    # Indentation pour lisibilité
+    indent: 2
+    # Inclure les métadonnées étendues
+    include_metadata: true
+  
+  # Options pour le format HTML
+  html:
+    # Thème pour le rapport HTML
+    theme: "dark"
+    # Inclure les extraits de code
+    include_snippets: true

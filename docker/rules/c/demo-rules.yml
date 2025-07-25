@@ -1,0 +1,74 @@
+# Règles de démonstration pour Cerberus-SAST Docker
+# Ces règles complètent les règles par défaut pour la démonstration
+
+rules:
+  - id: demo-hardcoded-password
+    message: |
+      Mot de passe en dur détecté dans le code source.
+      Les mots de passe ne doivent jamais être codés en dur dans le code.
+      Utilisez des variables d'environnement ou un gestionnaire de secrets.
+    severity: HIGH
+    languages:
+      - c
+    patterns:
+      - pattern: char *password = "$PASSWORD"
+      - pattern: char password[] = "$PASSWORD"
+      - pattern: '#define PASSWORD "$PASSWORD"'
+    metadata:
+      cwe: "CWE-798"
+      owasp: "A07:2021"
+      category: "security"
+      subcategory: "hardcoded-credentials"
+      confidence: "HIGH"
+      references:
+        - "https://cwe.mitre.org/data/definitions/798.html"
+
+  - id: demo-unsafe-system-call
+    message: |
+      Appel système potentiellement dangereux détecté.
+      L'utilisation de system() avec des données non validées peut permettre
+      l'injection de commandes. Validez et échappez les entrées utilisateur.
+    severity: CRITICAL
+    languages:
+      - c
+    pattern: system($CMD)
+    metadata:
+      cwe: "CWE-78"
+      owasp: "A03:2021"
+      category: "security"
+      subcategory: "command-injection"
+      confidence: "HIGH"
+
+  - id: demo-todo-comment
+    message: |
+      Commentaire TODO détecté dans le code de production.
+      Les commentaires TODO indiquent du travail non terminé et ne devraient
+      pas être présents dans le code de production.
+    severity: INFO
+    languages:
+      - c
+    patterns:
+      - pattern: "// TODO"
+      - pattern: "/* TODO"
+      - pattern: "// FIXME"
+      - pattern: "/* FIXME"
+    metadata:
+      category: "quality"
+      subcategory: "code-comments"
+      confidence: "HIGH"
+
+  - id: demo-magic-number
+    message: |
+      Nombre magique détecté dans le code.
+      Les nombres magiques rendent le code difficile à maintenir.
+      Utilisez des constantes nommées explicites.
+    severity: LOW
+    languages:
+      - c
+    patterns:
+      - pattern: "malloc($SIZE * 1024)"
+      - pattern: "malloc($SIZE * 2048)"
+    metadata:
+      category: "quality"
+      subcategory: "magic-numbers"
+      confidence: "MEDIUM"

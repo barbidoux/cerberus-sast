@@ -16,6 +16,25 @@ Cerberus-SAST est un moteur d'analyse de sécurité statique (SAST) modulaire et
 
 ## 📦 Installation
 
+### 🐳 Docker (Recommandé)
+
+La façon la plus simple d'utiliser Cerberus-SAST est avec Docker :
+
+```bash
+# Build de l'image
+docker build -t cerberus-sast .
+
+# Exécution rapide avec démonstration
+docker run --rm -v $(pwd)/output:/output cerberus-sast /usr/local/bin/run-example.sh
+
+# Scan d'un projet local
+docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/output \
+  cerberus-sast scan /workspace --format json --output /output/results.json
+
+# Mode interactif
+docker run -it --rm -v $(pwd)/output:/output cerberus-sast bash
+```
+
 ### Depuis PyPI (à venir)
 
 ```bash
@@ -26,14 +45,14 @@ pip install cerberus-sast
 
 ```bash
 # Cloner le repository
-git clone https://github.com/cerberus-sast/cerberus.git
-cd cerberus
+git clone https://github.com/barbidoux/cerberus-sast.git
+cd cerberus-sast
 
 # Installer en mode développement
 pip install -e .
 
 # Installer avec les dépendances de développement
-pip install -e ".[dev]"
+pip install -r requirements-dev.txt
 ```
 
 ### Installation du plugin C
@@ -89,9 +108,42 @@ plugins:
         severity_threshold: MEDIUM
 ```
 
+### 🐳 Usage Docker
+
+#### Commandes de base
+
+```bash
+# Voir l'aide
+docker run --rm cerberus-sast --help
+
+# Lister les règles disponibles
+docker run --rm cerberus-sast rules
+
+# Diagnostic du système
+docker run --rm cerberus-sast doctor
+
+# Démonstration complète
+docker run --rm -v $(pwd)/output:/output cerberus-sast /usr/local/bin/run-example.sh
+```
+
+#### Scan de votre projet
+
+```bash
+# Scan avec configuration par défaut
+docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/output \
+  cerberus-sast scan /workspace
+
+# Scan avec configuration personnalisée
+docker run --rm \
+  -v $(pwd):/workspace \
+  -v $(pwd)/output:/output \
+  -v $(pwd)/.cerberus.yml:/app/.cerberus.yml \
+  cerberus-sast scan /workspace --config /app/.cerberus.yml --format sarif --output /output/results.sarif
+```
+
 ### Intégration CI/CD
 
-#### GitHub Actions
+#### GitHub Actions avec Docker
 
 ```yaml
 name: Security Scan
@@ -104,36 +156,68 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Install Cerberus
-        run: |
-          pip install cerberus-sast
-          pip install cerberus-c-plugin
+      - name: Build Cerberus image
+        run: docker build -t cerberus-sast .
       
       - name: Run Cerberus scan
-        run: cerberus scan --format sarif --output results.sarif
+        run: |
+          mkdir -p output
+          docker run --rm \
+            -v $(pwd):/workspace \
+            -v $(pwd)/output:/output \
+            cerberus-sast scan /workspace --format sarif --output /output/results.sarif
       
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: results.sarif
+          sarif_file: output/results.sarif
 ```
 
-#### GitLab CI
+#### GitLab CI avec Docker
 
 ```yaml
 cerberus-sast:
-  image: python:3.11
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
   script:
-    - pip install cerberus-sast cerberus-c-plugin
-    - cerberus scan --format sarif --output gl-sast-report.json
+    - docker build -t cerberus-sast .
+    - mkdir -p output
+    - docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/output 
+        cerberus-sast scan /workspace --format sarif --output /output/gl-sast-report.json
   artifacts:
     reports:
-      sast: gl-sast-report.json
+      sast: output/gl-sast-report.json
+    paths:
+      - output/
+```
+
+#### Installation native (sans Docker)
+
+```yaml
+# GitHub Actions - Installation native
+cerberus-native:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Cerberus
+      run: |
+        pip install -r requirements.txt
+        pip install -e .
+    
+    - name: Run Cerberus scan
+      run: cerberus scan --format sarif --output results.sarif
+    
+    - name: Upload SARIF results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: results.sarif
 ```
 
 ## 🧩 Plugins disponibles
@@ -182,9 +266,90 @@ Cerberus-SAST suit les meilleures pratiques de sécurité :
 - ✅ Auto-analyse du code source
 - ✅ Isolation des plugins
 
+## 🐳 Guide Docker détaillé
+
+### Structure de l'image
+
+L'image Docker Cerberus-SAST contient :
+- **Python 3.11** avec toutes les dépendances
+- **Tree-sitter** et parsers pour C/C++, Python, JavaScript
+- **Cerberus-SAST** préinstallé et configuré
+- **Fichiers d'exemple** pour démonstration (`/app/docker/`)
+- **Script de démonstration** (`/usr/local/bin/run-example.sh`)
+
+### Variables d'environnement
+
+| Variable | Valeur par défaut | Description |
+|----------|-------------------|-------------|
+| `CERBERUS_HOME` | `/app` | Répertoire d'installation |
+| `CERBERUS_OUTPUT` | `/output` | Répertoire de sortie |
+| `PYTHONUNBUFFERED` | `1` | Sortie Python non bufferisée |
+
+### Volumes recommandés
+
+| Volume local | Volume conteneur | Usage |
+|--------------|------------------|-------|
+| `$(pwd)` | `/workspace` | Code source à analyser |
+| `$(pwd)/output` | `/output` | Rapports et résultats |
+| `$(pwd)/.cerberus.yml` | `/app/.cerberus.yml` | Configuration |
+
+### Exemples d'utilisation avancés
+
+```bash
+# Scan avec baseline
+docker run --rm \
+  -v $(pwd):/workspace \
+  -v $(pwd)/output:/output \
+  cerberus-sast scan /workspace --compare-to-baseline /output/baseline.json
+
+# Création de baseline
+docker run --rm \
+  -v $(pwd):/workspace \
+  -v $(pwd)/output:/output \
+  cerberus-sast baseline /workspace --output /output/baseline.json
+
+# Mode développement interactif
+docker run -it --rm \
+  -v $(pwd):/workspace \
+  -v $(pwd)/output:/output \
+  --entrypoint bash \
+  cerberus-sast
+
+# Scan avec règles personnalisées
+docker run --rm \
+  -v $(pwd):/workspace \
+  -v $(pwd)/custom-rules:/app/custom-rules \
+  -v $(pwd)/output:/output \
+  cerberus-sast scan /workspace --config /app/.cerberus.yml
+```
+
+### Publication Docker Hub
+
+```bash
+# Build pour multiple architectures
+docker buildx build --platform linux/amd64,linux/arm64 -t cerberus-sast:latest .
+
+# Tag et push vers Docker Hub
+docker tag cerberus-sast:latest your-username/cerberus-sast:1.0.0
+docker push your-username/cerberus-sast:1.0.0
+```
+
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! Consultez notre [Guide de contribution](CONTRIBUTING.md).
+
+### Développement avec Docker
+
+```bash
+# Build de l'image de développement
+docker build -f Dockerfile.dev -t cerberus-sast:dev .
+
+# Tests dans le conteneur
+docker run --rm -v $(pwd):/app cerberus-sast:dev python -m pytest
+
+# Linting
+docker run --rm -v $(pwd):/app cerberus-sast:dev ruff check .
+```
 
 ## 📄 License
 

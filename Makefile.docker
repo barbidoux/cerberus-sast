@@ -1,0 +1,190 @@
+# Makefile pour les opérations Docker de Cerberus-SAST
+# Usage: make -f Makefile.docker <target>
+
+# Configuration
+IMAGE_NAME = cerberus-sast
+VERSION = latest
+REGISTRY = ghcr.io/barbidoux
+OUTPUT_DIR = $(PWD)/output
+
+.PHONY: help build run demo test clean push pull dev docs
+
+# Aide par défaut
+help:
+	@echo "🛡️  Cerberus-SAST Docker Makefile"
+	@echo ""
+	@echo "Commandes disponibles:"
+	@echo "  build          - Build l'image Docker"
+	@echo "  run            - Lance un scan sur le répertoire courant"
+	@echo "  demo           - Exécute la démonstration complète"
+	@echo "  test           - Lance les tests dans le conteneur"
+	@echo "  dev            - Mode développement interactif"
+	@echo "  docs           - Génère la documentation"
+	@echo "  clean          - Nettoie les images et conteneurs"
+	@echo "  push           - Publie l'image sur le registry"
+	@echo "  pull           - Télécharge l'image depuis le registry"
+	@echo ""
+	@echo "Variables:"
+	@echo "  IMAGE_NAME     = $(IMAGE_NAME)"
+	@echo "  VERSION        = $(VERSION)"
+	@echo "  REGISTRY       = $(REGISTRY)"
+	@echo "  OUTPUT_DIR     = $(OUTPUT_DIR)"
+
+# Build de l'image Docker
+build:
+	@echo "🔨 Build de l'image Docker..."
+	docker build -t $(IMAGE_NAME):$(VERSION) .
+	@echo "✅ Image $(IMAGE_NAME):$(VERSION) créée"
+
+# Build multi-platform
+build-multiplatform:
+	@echo "🔨 Build multi-platform..."
+	docker buildx build --platform linux/amd64,linux/arm64 -t $(IMAGE_NAME):$(VERSION) .
+
+# Scan du répertoire courant
+run: build
+	@echo "🔍 Scan du répertoire courant..."
+	@mkdir -p $(OUTPUT_DIR)
+	docker run --rm \
+		-v $(PWD):/workspace:ro \
+		-v $(OUTPUT_DIR):/output \
+		$(IMAGE_NAME):$(VERSION) scan /workspace --format json --output /output/results.json
+	@echo "✅ Scan terminé, résultats dans $(OUTPUT_DIR)/"
+
+# Démonstration complète
+demo: build
+	@echo "🎭 Lancement de la démonstration..."
+	@mkdir -p $(OUTPUT_DIR)
+	docker run --rm \
+		-v $(OUTPUT_DIR):/output \
+		$(IMAGE_NAME):$(VERSION) /usr/local/bin/run-example.sh
+	@echo "✅ Démonstration terminée, fichiers dans $(OUTPUT_DIR)/"
+
+# Tests
+test: build
+	@echo "🧪 Exécution des tests..."
+	docker run --rm \
+		-v $(PWD):/app:ro \
+		$(IMAGE_NAME):$(VERSION) python -m pytest tests/ -v
+
+# Mode développement interactif
+dev: build
+	@echo "💻 Mode développement interactif..."
+	@mkdir -p $(OUTPUT_DIR)
+	docker run -it --rm \
+		-v $(PWD):/app:rw \
+		-v $(OUTPUT_DIR):/output \
+		--entrypoint bash \
+		$(IMAGE_NAME):$(VERSION)
+
+# Génération de documentation
+docs: build
+	@echo "📚 Génération de la documentation..."
+	@mkdir -p $(OUTPUT_DIR)/docs
+	docker run --rm \
+		-v $(OUTPUT_DIR)/docs:/output \
+		$(IMAGE_NAME):$(VERSION) rules > $(OUTPUT_DIR)/docs/rules.txt
+	docker run --rm \
+		-v $(OUTPUT_DIR)/docs:/output \
+		$(IMAGE_NAME):$(VERSION) doctor > $(OUTPUT_DIR)/docs/system-info.txt
+	@echo "✅ Documentation générée dans $(OUTPUT_DIR)/docs/"
+
+# Commandes spécifiques
+rules: build
+	@echo "📋 Liste des règles disponibles..."
+	docker run --rm $(IMAGE_NAME):$(VERSION) rules
+
+doctor: build
+	@echo "🩺 Diagnostic du système..."
+	docker run --rm $(IMAGE_NAME):$(VERSION) doctor
+
+baseline: build
+	@echo "📊 Création d'une baseline..."
+	@mkdir -p $(OUTPUT_DIR)
+	docker run --rm \
+		-v $(PWD):/workspace:ro \
+		-v $(OUTPUT_DIR):/output \
+		$(IMAGE_NAME):$(VERSION) baseline /workspace --output /output/baseline.json
+
+# Scan avec formats multiples
+scan-all: build
+	@echo "🔍 Scan avec tous les formats..."
+	@mkdir -p $(OUTPUT_DIR)
+	docker run --rm \
+		-v $(PWD):/workspace:ro \
+		-v $(OUTPUT_DIR):/output \
+		$(IMAGE_NAME):$(VERSION) scan /workspace --format json --output /output/results.json
+	docker run --rm \
+		-v $(PWD):/workspace:ro \
+		-v $(OUTPUT_DIR):/output \
+		$(IMAGE_NAME):$(VERSION) scan /workspace --format sarif --output /output/results.sarif
+	docker run --rm \
+		-v $(PWD):/workspace:ro \
+		-v $(OUTPUT_DIR):/output \
+		$(IMAGE_NAME):$(VERSION) scan /workspace --format html --output /output/results.html
+	@echo "✅ Scans terminés dans tous les formats"
+
+# Publication sur registry
+push: build
+	@echo "📤 Publication sur $(REGISTRY)..."
+	docker tag $(IMAGE_NAME):$(VERSION) $(REGISTRY)/$(IMAGE_NAME):$(VERSION)
+	docker push $(REGISTRY)/$(IMAGE_NAME):$(VERSION)
+	@echo "✅ Image publiée: $(REGISTRY)/$(IMAGE_NAME):$(VERSION)"
+
+# Téléchargement depuis registry
+pull:
+	@echo "📥 Téléchargement depuis $(REGISTRY)..."
+	docker pull $(REGISTRY)/$(IMAGE_NAME):$(VERSION)
+	docker tag $(REGISTRY)/$(IMAGE_NAME):$(VERSION) $(IMAGE_NAME):$(VERSION)
+
+# Nettoyage
+clean:
+	@echo "🧹 Nettoyage des conteneurs et images..."
+	-docker container prune -f
+	-docker image rm $(IMAGE_NAME):$(VERSION) 2>/dev/null || true
+	-docker image rm $(REGISTRY)/$(IMAGE_NAME):$(VERSION) 2>/dev/null || true
+	-docker system prune -f
+	@echo "✅ Nettoyage terminé"
+
+# Nettoyage complet
+clean-all: clean
+	@echo "🧹 Nettoyage complet..."
+	-docker image prune -a -f
+	-docker volume prune -f
+	-rm -rf $(OUTPUT_DIR)
+	@echo "✅ Nettoyage complet terminé"
+
+# Informations sur l'image
+info: build
+	@echo "ℹ️  Informations sur l'image:"
+	@docker images $(IMAGE_NAME):$(VERSION)
+	@echo ""
+	@echo "📦 Taille de l'image:"
+	@docker image inspect $(IMAGE_NAME):$(VERSION) --format='{{.Size}}' | numfmt --to=iec-i --suffix=B
+	@echo ""
+	@echo "🏷️  Layers:"
+	@docker history $(IMAGE_NAME):$(VERSION) --no-trunc
+
+# Test de sécurité avec Trivy
+security-scan: build
+	@echo "🔒 Scan de sécurité avec Trivy..."
+	-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+		aquasec/trivy image $(IMAGE_NAME):$(VERSION)
+
+# Benchmark de performance
+benchmark: build
+	@echo "⚡ Benchmark de performance..."
+	@mkdir -p $(OUTPUT_DIR)
+	time docker run --rm \
+		-v $(PWD):/workspace:ro \
+		-v $(OUTPUT_DIR):/output \
+		$(IMAGE_NAME):$(VERSION) scan /workspace --format json --output /output/benchmark.json
+
+# Aide spécifique à Docker Compose
+compose-help:
+	@echo "🐳 Commandes Docker Compose disponibles:"
+	@echo "  docker-compose up demo      - Démonstration"
+	@echo "  docker-compose up dev       - Mode développement"
+	@echo "  docker-compose up test      - Tests"
+	@echo "  docker-compose up docs      - Documentation"
+	@echo "  docker-compose down         - Arrêt des services"
