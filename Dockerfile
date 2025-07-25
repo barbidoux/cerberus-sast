@@ -28,15 +28,26 @@ WORKDIR /app
 # Copie des fichiers de requirements d'abord (pour optimiser le cache Docker)
 COPY requirements.txt requirements-dev.txt ./
 
-# Installation des dépendances Python
+# Installation des dépendances Python (sans cerberus PyPI pour éviter conflit)
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements-dev.txt
+    pip install --no-cache-dir -r requirements-dev.txt && \
+    pip uninstall -y cerberus || true
 
 # Copie de tout le code source
 COPY . .
 
-# Installation de Cerberus-SAST en mode editable
-RUN pip install -e .
+# Installation de Cerberus-SAST en mode editable avec PYTHONPATH explicite
+RUN pip install -e . && \
+    pip uninstall -y cerberus || true
+
+# Installation du plugin C
+RUN cd plugins/cerberus-c-plugin && \
+    pip install -e .
+
+# Vérification de l'installation
+RUN python -c "import sys; print('Python path:', sys.path)" && \
+    python -c "from cerberus.cli.commands import main; print('✅ Import successful')" && \
+    cerberus --help
 
 # Création du répertoire de sortie
 RUN mkdir -p $CERBERUS_OUTPUT && \
