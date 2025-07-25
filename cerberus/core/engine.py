@@ -17,6 +17,7 @@ from cerberus.core.scanner import FileScanner
 from cerberus.reporting.formats import ReportGenerator
 from cerberus.ast.cerberus_node import CerberusNode
 from cerberus.models.finding import Finding
+from cerberus.core.cache import CacheManager
 
 try:
     import tree_sitter
@@ -47,6 +48,9 @@ class CerberusEngine:
         
         # Déterminer le nombre de workers
         self.num_workers = config.scan.parallel_workers or mp.cpu_count()
+        
+        # Initialiser le gestionnaire de cache
+        self.cache_manager = CacheManager() if config.scan.cache_enabled else None
         
         # Initialiser les plugins
         self._initialize_plugins()
@@ -120,7 +124,7 @@ class CerberusEngine:
     
     def _analyze_file(self, file_path: Path) -> List[Finding]:
         """
-        Analyse un fichier individuel.
+        Analyse un fichier individuel avec gestion du cache.
         
         Args:
             file_path: Chemin du fichier à analyser
@@ -137,18 +141,42 @@ class CerberusEngine:
                 logger.debug(f"Aucun plugin pour: {file_path}")
                 return findings
             
+            # Vérifier le cache si activé
+            if self.cache_manager:
+                cached_findings = self.cache_manager.get_cached_findings(
+                    file_path, plugin.name, "1.0"
+                )
+                if cached_findings is not None:
+                    logger.debug(f"Cache hit pour {file_path}: {len(cached_findings)} findings")
+                    return cached_findings
+            
             # Parser le fichier avec tree-sitter
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # Générer l'AST avec Tree-sitter
-            ast = self._parse_file(content, file_path, plugin)
-            if not ast:
-                logger.warning(f"Impossible de parser le fichier: {file_path}")
-                return findings
+            # Vérifier le cache AST si disponible
+            ast = None
+            if self.cache_manager:
+                cached_ast = self.cache_manager.get_cached_ast(file_path, plugin.name, "1.0")
+                if cached_ast is not None:
+                    ast = cached_ast
+                    logger.debug(f"AST récupéré du cache pour {file_path}")
+            
+            # Générer l'AST avec Tree-sitter si pas en cache
+            if ast is None:
+                ast = self._parse_file(content, file_path, plugin)
+                if not ast:
+                    logger.warning(f"Impossible de parser le fichier: {file_path}")
+                    return findings
             
             # Appliquer les règles
             findings = self.rule_engine.check_file(ast, file_path, plugin.name)
+            
+            # Mettre en cache les résultats si le cache est activé
+            if self.cache_manager:
+                self.cache_manager.cache_findings(
+                    file_path, plugin.name, findings, "1.0", ast
+                )
             
             logger.debug(f"Fichier analysé: {file_path} - {len(findings)} findings")
             
