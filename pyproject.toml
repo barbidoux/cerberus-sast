@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cerberus-sast"
+version = "1.0.0"
+description = "Moteur d'analyse de sécurité statique modulaire et extensible"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Cerberus Team", email = "cerberus@example.com"}
+]
+keywords = ["sast", "security", "static-analysis", "devsecops"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "click>=8.1",           # CLI framework
+    "pyyaml>=6.0",          # YAML parsing
+    "tree-sitter>=0.20",    # Code parsing
+    "colorama>=0.4",        # Terminal colors
+    "rich>=13.0",           # Rich terminal output
+    "pydantic>=2.0",        # Data validation
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+]
+
+[project.scripts]
+cerberus = "cerberus.cli.commands:main"
+
+[project.entry-points."cerberus.plugins"]
+# Les plugins s'enregistrent ici
+
+[tool.setuptools.packages.find]
+include = ["cerberus*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true

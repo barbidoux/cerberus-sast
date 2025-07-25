@@ -1,0 +1,81 @@
+# Configuration exemple pour Cerberus-SAST
+version: "1.0"
+
+# Configuration globale du scan
+scan:
+  # Sévérité minimale pour faire échouer le build (CRITICAL, HIGH, MEDIUM, LOW, INFO, NONE)
+  fail_on_severity: HIGH
+  
+  # Chemins à exclure de l'analyse
+  exclude_paths:
+    - "**/tests/**"
+    - "**/test_*"
+    - "**/vendor/**"
+    - "**/third_party/**"
+    - "**/*.min.js"
+    - "**/node_modules/**"
+    - "**/build/**"
+    - "**/dist/**"
+  
+  # Taille maximale des fichiers à analyser (en MB)
+  max_file_size_mb: 10
+  
+  # Nombre de workers parallèles (null = auto-détection)
+  parallel_workers: null
+  
+  # Activer la mise en cache des résultats
+  cache_enabled: true
+
+# Configuration des plugins
+plugins:
+  # Plugin C/C++
+  c:
+    enabled: true
+    options:
+      # Standard C à utiliser (c89, c90, c99, c11, c17, c18)
+      c_standard: c11
+      
+      # Traiter les fichiers C++ aussi
+      include_cpp: true
+    
+    # Configuration des ensembles de règles
+    rulesets:
+      buffer-overflow:
+        enabled: true
+        severity_threshold: MEDIUM
+      
+      memory-management:
+        enabled: true
+        severity_threshold: HIGH
+    
+    # Règles personnalisées additionnelles
+    custom_rules:
+      # - /chemin/vers/mes-regles.yml
+  
+  # Plugin Python (exemple pour le futur)
+  # python:
+  #   enabled: false
+  #   options:
+  #     python_version: "3.11"
+  #   rulesets:
+  #     security:
+  #       enabled: true
+
+# Configuration du reporting
+reporting:
+  # Inclure les extraits de code dans les rapports
+  include_code_snippets: true
+  
+  # Nombre de lignes de contexte autour des vulnérabilités
+  context_lines: 3
+  
+  # Formats de sortie par défaut
+  default_format: console
+  
+  # Options spécifiques à SARIF
+  sarif:
+    # Inclure les suggestions de correction automatique
+    include_fixes: true
+    
+    # Niveau de détail (minimal, standard, detailed)
+    detail_level: standard

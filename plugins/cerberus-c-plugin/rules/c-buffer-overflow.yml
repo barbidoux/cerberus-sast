@@ -1,0 +1,78 @@
+rules:
+  - id: c-buffer-overflow-strcpy
+    message: |
+      L'utilisation de strcpy() est dangereuse car elle ne vérifie pas les limites du tampon de destination.
+      Cela peut conduire à un dépassement de tampon (buffer overflow).
+      Utilisez strncpy() ou strlcpy() à la place avec une limite de taille explicite.
+    severity: HIGH
+    languages:
+      - c
+    pattern: strcpy($DEST, $SRC)
+    metadata:
+      cwe: "CWE-120"
+      owasp: "A03:2021"
+      category: "security"
+      subcategory: "buffer-overflow"
+      confidence: "HIGH"
+      references:
+        - "https://cwe.mitre.org/data/definitions/120.html"
+        - "https://www.securecoding.cert.org/confluence/display/c/STR31-C"
+    autofix:
+      pattern: strncpy($DEST, $SRC, sizeof($DEST) - 1)
+      
+  - id: c-buffer-overflow-gets
+    message: |
+      La fonction gets() est extrêmement dangereuse et ne devrait jamais être utilisée.
+      Elle ne limite pas la quantité de données lues, ce qui peut facilement causer un buffer overflow.
+      Utilisez fgets() à la place.
+    severity: CRITICAL
+    languages:
+      - c
+    pattern: gets($BUF)
+    metadata:
+      cwe: "CWE-242"
+      owasp: "A03:2021"
+      category: "security"
+      subcategory: "buffer-overflow"
+      confidence: "HIGH"
+      deprecated: true
+      references:
+        - "https://cwe.mitre.org/data/definitions/242.html"
+    autofix:
+      pattern: fgets($BUF, sizeof($BUF), stdin)
+      
+  - id: c-buffer-overflow-sprintf
+    message: |
+      sprintf() ne limite pas la taille du buffer de destination et peut causer un buffer overflow.
+      Utilisez snprintf() avec une limite de taille.
+    severity: HIGH
+    languages:
+      - c
+    pattern: sprintf($DEST, $FORMAT, ...)
+    metadata:
+      cwe: "CWE-120"
+      owasp: "A03:2021"
+      category: "security"
+      subcategory: "buffer-overflow"
+      confidence: "MEDIUM"
+    autofix:
+      pattern: snprintf($DEST, sizeof($DEST), $FORMAT, ...)
+      
+  - id: c-format-string-bug
+    message: |
+      Passer une chaîne contrôlée par l'utilisateur directement à printf() peut permettre
+      des attaques de format string. Utilisez toujours un format string littéral.
+    severity: HIGH
+    languages:
+      - c
+    patterns:
+      - pattern: printf($USER_INPUT)
+      - pattern-not: printf("%s", ...)
+    metadata:
+      cwe: "CWE-134"
+      owasp: "A03:2021"
+      category: "security"
+      subcategory: "format-string"
+      confidence: "HIGH"
+    autofix:
+      pattern: printf("%s", $USER_INPUT)
