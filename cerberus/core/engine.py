@@ -15,6 +15,13 @@ from cerberus.plugins.manager import PluginManager
 from cerberus.analysis.rule_engine import RuleEngine
 from cerberus.core.scanner import FileScanner
 from cerberus.reporting.formats import ReportGenerator
+from cerberus.ast.cerberus_node import CerberusNode
+from cerberus.models.finding import Finding
+
+try:
+    import tree_sitter
+except ImportError:
+    tree_sitter = None
 
 
 logger = logging.getLogger(__name__)
@@ -111,7 +118,7 @@ class CerberusEngine:
         
         return results
     
-    def _analyze_file(self, file_path: Path) -> List[Dict[str, Any]]:
+    def _analyze_file(self, file_path: Path) -> List[Finding]:
         """
         Analyse un fichier individuel.
         
@@ -134,21 +141,72 @@ class CerberusEngine:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # TODO: Implémenter le parsing avec tree-sitter
-            # Pour l'instant, on retourne une liste vide
-            # ast = self._parse_file(content, plugin.get_tree_sitter_language())
+            # Générer l'AST avec Tree-sitter
+            ast = self._parse_file(content, file_path, plugin)
+            if not ast:
+                logger.warning(f"Impossible de parser le fichier: {file_path}")
+                return findings
             
             # Appliquer les règles
-            # findings = self.rule_engine.check_file(ast, file_path, plugin.name)
+            findings = self.rule_engine.check_file(ast, file_path, plugin.name)
             
-            logger.debug(f"Fichier analysé: {file_path}")
+            logger.debug(f"Fichier analysé: {file_path} - {len(findings)} findings")
             
         except Exception as e:
             logger.error(f"Erreur lors de l'analyse de {file_path}: {e}")
         
         return findings
     
-    def _aggregate_results(self, findings: List[Dict[str, Any]], files_count: int) -> Dict[str, Any]:
+    def _parse_file(self, content: str, file_path: Path, plugin) -> Optional[CerberusNode]:
+        """
+        Parse un fichier avec Tree-sitter et retourne un CerberusNode.
+        
+        Args:
+            content: Contenu du fichier
+            file_path: Chemin du fichier
+            plugin: Plugin responsable du langage
+            
+        Returns:
+            CerberusNode racine de l'AST ou None en cas d'erreur
+        """
+        if not tree_sitter:
+            logger.error("Tree-sitter n'est pas disponible")
+            return None
+        
+        try:
+            # Récupérer le langage Tree-sitter du plugin
+            language = plugin.get_tree_sitter_language()
+            if not language:
+                logger.error(f"Langage Tree-sitter non disponible pour {plugin.name}")
+                return None
+            
+            # Créer le parser
+            parser = tree_sitter.Parser()
+            parser.set_language(language)
+            
+            # Parser le contenu
+            tree = parser.parse(bytes(content, 'utf-8'))
+            
+            if tree.root_node.has_error:
+                logger.warning(f"Erreurs de parsing détectées dans {file_path}")
+            
+            # Créer le CerberusNode racine
+            root_node = CerberusNode(
+                tree_sitter_node=tree.root_node,
+                source_code=content,
+                file_path=file_path
+            )
+            
+            logger.debug(f"AST généré pour {file_path}: {tree.root_node.type} "
+                        f"({len(tree.root_node.children)} enfants)")
+            
+            return root_node
+            
+        except Exception as e:
+            logger.error(f"Erreur lors du parsing de {file_path}: {e}")
+            return None
+    
+    def _aggregate_results(self, findings: List[Finding], files_count: int) -> Dict[str, Any]:
         """
         Agrège les résultats de l'analyse.
         
@@ -169,12 +227,37 @@ class CerberusEngine:
         }
         
         for finding in findings:
-            severity = finding.get("severity", "INFO")
+            severity = finding.severity.value
             if severity in severity_counts:
                 severity_counts[severity] += 1
         
+        # Convertir les findings en dictionnaires pour la compatibilité
+        findings_dicts = []
+        for finding in findings:
+            finding_dict = {
+                "rule_id": finding.rule_id,
+                "message": finding.message,
+                "severity": finding.severity.value,
+                "file_path": finding.location.file_path,
+                "line": finding.location.line,
+                "column": finding.location.column,
+                "metadata": finding.metadata,
+                "variables": finding.variables
+            }
+            
+            if finding.code_snippet:
+                finding_dict["code_snippet"] = finding.code_snippet.content
+            
+            if finding.fix:
+                finding_dict["fix"] = {
+                    "pattern": finding.fix.pattern,
+                    "description": finding.fix.description
+                }
+            
+            findings_dicts.append(finding_dict)
+        
         return {
-            "findings": findings,
+            "findings": findings_dicts,
             "stats": {
                 "files_scanned": files_count,
                 "total_findings": len(findings),

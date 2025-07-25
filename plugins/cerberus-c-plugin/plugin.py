@@ -88,19 +88,17 @@ class CPlugin(LanguagePlugin):
         rule_paths = []
         
         try:
-            # Utiliser importlib.resources pour accéder aux fichiers du package
-            if hasattr(resources, 'files'):  # Python 3.9+
-                rules_dir = resources.files('cerberus_c_plugin') / 'rules'
-                for rule_file in rules_dir.iterdir():
-                    if rule_file.name.endswith('.yml'):
-                        rule_paths.append(Path(str(rule_file)))
-            else:  # Python < 3.9
-                # Fallback pour les versions plus anciennes
-                import pkg_resources
-                package_path = Path(pkg_resources.resource_filename('cerberus_c_plugin', 'rules'))
-                for rule_file in package_path.glob('*.yml'):
+            # Obtenir le chemin du plugin actuel
+            plugin_dir = Path(__file__).parent
+            rules_dir = plugin_dir / 'rules'
+            
+            if rules_dir.exists():
+                for rule_file in rules_dir.glob('*.yml'):
                     rule_paths.append(rule_file)
-                    
+                logger.info(f"Chargement de {len(rule_paths)} fichiers de règles depuis {rules_dir}")
+            else:
+                logger.warning(f"Répertoire de règles non trouvé: {rules_dir}")
+                
         except Exception as e:
             logger.error(f"Erreur lors du chargement des règles: {e}")
         
@@ -113,6 +111,7 @@ class CPlugin(LanguagePlugin):
             else:
                 logger.warning(f"Règle personnalisée non trouvée: {custom_rule}")
         
+        logger.debug(f"Chemins de règles finaux: {rule_paths}")
         return rule_paths
     
     def get_taint_models(self) -> Dict[str, Any]:
