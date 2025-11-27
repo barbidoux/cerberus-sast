@@ -6,17 +6,21 @@ Provides the main command-line interface using Click.
 
 from __future__ import annotations
 
+import asyncio
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import click
 from rich.console import Console
 from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.table import Table
 
 from cerberus import __version__
 from cerberus.core.config import CerberusConfig, validate_config
+from cerberus.core.orchestrator import OrchestratorConfig, ScanOrchestrator, DependencyError
+from cerberus.core.progress import ScanProgress, create_cli_progress_callback
 from cerberus.utils.logging import setup_logging
 
 console = Console()
@@ -199,15 +203,53 @@ def scan(
         console.print("\n[green]Dry run complete. No analysis performed.[/]")
         return
 
-    # TODO: Implement scan pipeline
-    console.print("\n[yellow]Scan pipeline not yet implemented[/]")
-    console.print("This will execute the four-phase NSSCP pipeline:")
-    console.print("  I.   Context Engine - Repository mapping")
-    console.print("  II.  Spec Inference - Source/Sink/Sanitizer identification")
-    console.print("  III. Detection - CPG-based taint analysis")
-    console.print("  IV.  Verification - Multi-Agent Council")
+    # Run the scan
+    try:
+        result = asyncio.run(_run_scan(
+            path=path,
+            cfg=cfg,
+            no_verify=no_verify,
+            council=council,
+            output=output,
+            output_format=output_format,
+            quiet=ctx.obj.get("quiet", False),
+        ))
 
-    raise NotImplementedError("Scan command not yet implemented")
+        # Print summary
+        if not ctx.obj.get("quiet"):
+            _print_scan_summary(result)
+
+        # Output results
+        if output:
+            _write_results(result, output, output_format)
+        elif output_format != "console":
+            _write_results(result, Path(f"cerberus-results.{output_format}"), output_format)
+
+        # Determine exit code
+        exit_code = EXIT_SUCCESS
+        if fail_on and result.scan_result.findings:
+            severity_order = ["critical", "high", "medium", "low"]
+            fail_threshold = severity_order.index(fail_on)
+            for finding in result.scan_result.findings:
+                finding_severity = finding.severity.lower() if isinstance(finding.severity, str) else finding.severity.value.lower()
+                if finding_severity in severity_order:
+                    if severity_order.index(finding_severity) <= fail_threshold:
+                        exit_code = EXIT_FINDINGS
+                        break
+
+        sys.exit(exit_code)
+
+    except DependencyError as e:
+        console.print(f"\n[red]Dependency error:[/] {e}")
+        console.print("[yellow]Ensure Joern is running (docker run --rm -p 9000:9000 joernio/joern)[/]")
+        sys.exit(EXIT_RUNTIME_ERROR)
+
+    except Exception as e:
+        console.print(f"\n[red]Scan failed:[/] {e}")
+        if ctx.obj.get("verbose"):
+            import traceback
+            console.print(traceback.format_exc())
+        sys.exit(EXIT_RUNTIME_ERROR)
 
 
 @cli.command()
@@ -445,6 +487,185 @@ def _print_config_summary(cfg: CerberusConfig) -> None:
     table.add_row("Report Formats", ", ".join(cfg.reporting.formats))
 
     console.print(table)
+
+
+async def _run_scan(
+    path: Path,
+    cfg: CerberusConfig,
+    no_verify: bool,
+    council: bool,
+    output: Optional[Path],
+    output_format: str,
+    quiet: bool,
+) -> Any:
+    """Run the scan pipeline with progress tracking."""
+    from cerberus.core.orchestrator import OrchestratorResult
+
+    # Configure orchestrator
+    orchestrator_config = OrchestratorConfig(
+        run_inference=True,
+        run_detection=True,
+        run_verification=not no_verify and council,
+        max_feedback_iterations=cfg.analysis.max_iterations if hasattr(cfg.analysis, 'max_iterations') else 3,
+        min_confidence=cfg.analysis.min_confidence if hasattr(cfg.analysis, 'min_confidence') else 0.5,
+        joern_endpoint=cfg.detection.joern_endpoint if hasattr(cfg.detection, 'joern_endpoint') else "http://localhost:9000",
+    )
+
+    # Create progress display
+    if not quiet:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+        ) as progress:
+            task_id = progress.add_task("[cyan]Scanning...", total=100)
+
+            def progress_callback(p: ScanProgress) -> None:
+                description = f"[{p.phase}]"
+                if p.message:
+                    description = f"{description} {p.message}"
+                elif p.current_file:
+                    description = f"{description} {p.current_file}"
+                progress.update(task_id, description=description, completed=p.overall_progress * 100)
+
+            orchestrator = ScanOrchestrator(
+                config=orchestrator_config,
+                progress_callback=progress_callback,
+            )
+
+            result = await orchestrator.scan(path, repository_name=cfg.project_name)
+    else:
+        orchestrator = ScanOrchestrator(config=orchestrator_config)
+        result = await orchestrator.scan(path, repository_name=cfg.project_name)
+
+    return result
+
+
+def _print_scan_summary(result: Any) -> None:
+    """Print scan results summary."""
+    from cerberus.core.orchestrator import OrchestratorResult
+    from cerberus.models.base import Verdict
+
+    sr = result.scan_result
+
+    # Summary panel
+    status_color = "green" if sr.status == "completed" else "red" if sr.status == "failed" else "yellow"
+    console.print(Panel.fit(
+        f"[bold]Scan {sr.status.upper()}[/]\n\n"
+        f"Files scanned: {sr.files_scanned}\n"
+        f"Lines analyzed: {sr.lines_scanned:,}\n"
+        f"Duration: {sr.duration_seconds:.2f}s",
+        title="Scan Summary",
+        border_style=status_color,
+    ))
+
+    # Spec inference results
+    if sr.sources_found or sr.sinks_found or sr.sanitizers_found:
+        console.print(f"\n[bold]Spec Inference:[/]")
+        console.print(f"  Sources:    {sr.sources_found}")
+        console.print(f"  Sinks:      {sr.sinks_found}")
+        console.print(f"  Sanitizers: {sr.sanitizers_found}")
+
+    # Findings summary
+    if sr.findings:
+        console.print(f"\n[bold red]Findings: {len(sr.findings)}[/]")
+
+        # Count by severity
+        severity_counts: dict[str, int] = {}
+        verdict_counts: dict[str, int] = {"true_positive": 0, "false_positive": 0, "uncertain": 0, "unverified": 0}
+
+        for finding in sr.findings:
+            sev = finding.severity.lower() if isinstance(finding.severity, str) else finding.severity.value.lower()
+            severity_counts[sev] = severity_counts.get(sev, 0) + 1
+
+            if finding.verification:
+                if finding.verification.verdict == Verdict.TRUE_POSITIVE:
+                    verdict_counts["true_positive"] += 1
+                elif finding.verification.verdict == Verdict.FALSE_POSITIVE:
+                    verdict_counts["false_positive"] += 1
+                else:
+                    verdict_counts["uncertain"] += 1
+            else:
+                verdict_counts["unverified"] += 1
+
+        # Severity table
+        table = Table(title="Findings by Severity")
+        table.add_column("Severity", style="cyan")
+        table.add_column("Count", style="red")
+
+        for sev in ["critical", "high", "medium", "low"]:
+            if sev in severity_counts:
+                style = "bold red" if sev in ["critical", "high"] else "yellow" if sev == "medium" else "dim"
+                table.add_row(sev.upper(), str(severity_counts[sev]), style=style)
+
+        console.print(table)
+
+        # Verdict table (if verification was run)
+        if verdict_counts["true_positive"] + verdict_counts["false_positive"] + verdict_counts["uncertain"] > 0:
+            table = Table(title="Verification Results")
+            table.add_column("Verdict", style="cyan")
+            table.add_column("Count")
+
+            table.add_row("True Positive", str(verdict_counts["true_positive"]), style="red")
+            table.add_row("False Positive", str(verdict_counts["false_positive"]), style="green")
+            table.add_row("Uncertain", str(verdict_counts["uncertain"]), style="yellow")
+            table.add_row("Unverified", str(verdict_counts["unverified"]), style="dim")
+
+            console.print(table)
+
+        # List findings
+        console.print("\n[bold]Findings:[/]")
+        for i, finding in enumerate(sr.findings[:10], 1):  # Show first 10
+            sev = finding.severity.upper() if isinstance(finding.severity, str) else finding.severity.value.upper()
+            sev_style = "red" if sev in ["CRITICAL", "HIGH"] else "yellow" if sev == "MEDIUM" else "dim"
+            verdict = ""
+            if finding.verification:
+                v = finding.verification.verdict.value
+                verdict = f" [{v}]"
+
+            console.print(f"  {i}. [{sev_style}][{sev}][/{sev_style}] {finding.vulnerability_type}{verdict}")
+            if finding.source:
+                console.print(f"     Source: {finding.source.method} ({finding.source.file_path}:{finding.source.line})")
+            if finding.sink:
+                console.print(f"     Sink: {finding.sink.method} ({finding.sink.file_path}:{finding.sink.line})")
+
+        if len(sr.findings) > 10:
+            console.print(f"\n  ... and {len(sr.findings) - 10} more findings")
+    else:
+        console.print("\n[bold green]No vulnerabilities found![/]")
+
+    # Errors
+    if sr.errors:
+        console.print(f"\n[yellow]Warnings/Errors: {len(sr.errors)}[/]")
+        for err in sr.errors[:5]:
+            console.print(f"  - {err.get('phase', 'unknown')}: {err.get('error', 'Unknown error')}")
+
+    # Feedback loop info
+    if hasattr(result, 'iterations_run') and result.iterations_run > 1:
+        console.print(f"\n[dim]Feedback iterations: {result.iterations_run}[/]")
+        console.print(f"[dim]Spec updates applied: {result.spec_updates_applied}[/]")
+
+
+def _write_results(result: Any, output: Path, output_format: str) -> None:
+    """Write scan results to file using the reporting module."""
+    from cerberus.reporting import ReporterRegistry
+
+    sr = result.scan_result
+
+    # Get reporter from registry
+    reporter = ReporterRegistry.create(output_format)
+    if reporter is None:
+        console.print(f"[yellow]Unknown output format: {output_format}[/]")
+        return
+
+    try:
+        # Write the report
+        output_path = reporter.write(sr, output)
+        console.print(f"[green]Results written to:[/] {output_path}")
+    except Exception as e:
+        console.print(f"[red]Failed to write report:[/] {e}")
 
 
 if __name__ == "__main__":

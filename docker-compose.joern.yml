@@ -1,0 +1,33 @@
+# Cerberus SAST - Joern-only Docker Compose
+# Use this for development or when running Cerberus natively
+
+services:
+  joern:
+    image: joernio/joern:latest
+    container_name: cerberus-joern
+    ports:
+      - "8080:8080"
+    volumes:
+      - joern-workspace:/workspace
+      - .:/code:ro  # Mount current directory for scanning
+    command: >
+      joern --server
+      --server-host 0.0.0.0
+      --server-port 8080
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+volumes:
+  joern-workspace:
+    driver: local

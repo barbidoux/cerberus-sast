@@ -1,1 +1,1 @@
-"""Tests for reporting module."""
+"""Tests for the reporting module."""

@@ -1,0 +1,99 @@
+# Cerberus SAST - Full Stack Docker Compose
+# Includes Cerberus, Joern, and supporting services
+
+services:
+  # Cerberus API Server
+  cerberus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cerberus-api
+    command: ["api", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./scans:/scans:ro  # Mount scan targets (read-only)
+      - ./reports:/reports  # Output reports
+    environment:
+      - CERBERUS_JOERN_ENDPOINT=joern:8080
+      - CERBERUS_LOG_LEVEL=INFO
+    depends_on:
+      joern:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - cerberus-net
+    restart: unless-stopped
+
+  # Joern Code Property Graph Server
+  joern:
+    image: joernio/joern:latest
+    container_name: cerberus-joern
+    ports:
+      - "8080:8080"
+    volumes:
+      - joern-workspace:/workspace
+      - ./scans:/scans:ro
+    command: >
+      joern --server
+      --server-host 0.0.0.0
+      --server-port 8080
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - cerberus-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+  # Ollama LLM Server (optional - for local LLM inference)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cerberus-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - cerberus-net
+    restart: unless-stopped
+    profiles:
+      - llm  # Only start with --profile llm
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  joern-workspace:
+    driver: local
+  ollama-models:
+    driver: local
+
+networks:
+  cerberus-net:
+    driver: bridge
