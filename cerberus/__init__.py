@@ -1,12 +1,13 @@
 """
-Cerberus-SAST : Moteur d'analyse de sécurité statique modulaire
+Cerberus SAST - AI-Driven Static Application Security Testing
+
+A Neuro-Symbolic Self-Configuring Pipeline (NSSCP) that combines
+LLM semantic reasoning with Code Property Graph (CPG) precision.
 """
 
 __version__ = "1.0.0"
 __author__ = "Cerberus Team"
 
-# Importations principales pour faciliter l'utilisation
-from cerberus.core.engine import CerberusEngine
-from cerberus.plugins.base import LanguagePlugin
+from cerberus.core.config import CerberusConfig
 
-__all__ = ["CerberusEngine", "LanguagePlugin", "__version__"]
+__all__ = ["__version__", "CerberusConfig"]

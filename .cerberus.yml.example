@@ -1,0 +1,190 @@
+# Cerberus SAST Configuration
+# ============================
+# This file configures the Neuro-Symbolic Self-Configuring Pipeline (NSSCP)
+# for AI-driven static application security testing.
+#
+# Configuration priority (highest to lowest):
+# 1. CLI arguments
+# 2. Environment variables (CERBERUS_*)
+# 3. Project config (.cerberus.yml)
+# 4. User config (~/.cerberus/config.yml)
+# 5. Default values
+
+# Project name for reports and logs
+project_name: "my-project"
+
+# Output directory for results and artifacts
+output_dir: "./cerberus-output"
+
+# =============================================================================
+# Analysis Configuration
+# =============================================================================
+analysis:
+  # Languages to analyze
+  # Use "auto" to detect automatically, or specify:
+  # c, cpp, java, javascript, typescript, python, kotlin, php, go, swift, ruby, csharp, scala
+  languages:
+    - auto
+
+  # Glob patterns to exclude from analysis
+  exclude_patterns:
+    - "**/node_modules/**"
+    - "**/vendor/**"
+    - "**/.git/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/__pycache__/**"
+    - "**/*.min.js"
+    - "**/*.min.css"
+    - "**/test/**"
+    - "**/tests/**"
+    - "**/*_test.go"
+    - "**/*_test.py"
+
+  # Maximum file size to analyze (in MB)
+  max_file_size_mb: 10
+
+  # Maximum number of files to analyze
+  max_files: 10000
+
+  # Follow symbolic links
+  follow_symlinks: false
+
+# =============================================================================
+# LLM Configuration
+# =============================================================================
+llm:
+  # Default LLM provider: ollama, anthropic, openai
+  default_provider: "ollama"
+
+  # Retry configuration
+  retry_max_attempts: 3
+  retry_backoff_factor: 2.0
+
+  # Response caching
+  cache_enabled: true
+  cache_ttl: 3600  # seconds
+
+  # Ollama (local) configuration
+  ollama:
+    base_url: "http://localhost:11434"
+    model: "qwen2.5-coder:32b"
+    timeout: 120
+    context_length: 32768
+
+  # Anthropic Claude configuration
+  # API key can also be set via ANTHROPIC_API_KEY environment variable
+  anthropic:
+    # api_key: "sk-ant-..."
+    model: "claude-sonnet-4-20250514"
+    timeout: 60
+    max_tokens: 4096
+
+  # OpenAI GPT configuration
+  # API key can also be set via OPENAI_API_KEY environment variable
+  openai:
+    # api_key: "sk-..."
+    model: "gpt-4-turbo"
+    timeout: 60
+    max_tokens: 4096
+
+# =============================================================================
+# Joern CPG Configuration
+# =============================================================================
+joern:
+  # Joern server endpoint
+  endpoint: "localhost:8080"
+
+  # Workspace directory for CPG files
+  workspace: "./.cerberus/workspace"
+
+  # Docker image for Joern
+  docker_image: "joernio/joern:latest"
+
+  # Memory limit for Joern container
+  memory_limit: "8g"
+
+  # Query timeout in seconds
+  timeout: 300
+
+  # Automatically start Joern server if not running
+  auto_start: true
+
+# =============================================================================
+# Verification Configuration (Phase IV)
+# =============================================================================
+verification:
+  # Enable verification phase
+  enabled: true
+
+  # Use Multi-Agent Council (Attacker/Defender/Judge)
+  council_mode: true
+
+  # Confidence threshold for final verdicts (0.0 - 1.0)
+  confidence_threshold: 0.7
+
+  # Maximum iterations for feedback loop
+  max_iterations: 3
+
+  # Timeout per finding verification (seconds)
+  timeout_per_finding: 60
+
+# =============================================================================
+# Reporting Configuration
+# =============================================================================
+reporting:
+  # Output formats: sarif, json, html, console, markdown
+  formats:
+    - sarif
+    - console
+
+  # Output directory for reports
+  output_dir: "./cerberus-output"
+
+  # Include code snippets in reports
+  include_code_snippets: true
+
+  # Maximum lines per code snippet
+  max_snippet_lines: 10
+
+  # SARIF version
+  sarif_version: "2.1.0"
+
+# =============================================================================
+# Security Configuration
+# =============================================================================
+security:
+  # Allow sending code to cloud LLM providers
+  # If false, only local Ollama will be used
+  allow_cloud_llm: false
+
+  # Redact potential secrets from LLM prompts
+  redact_secrets: true
+
+  # Require authentication for API server
+  api_require_auth: true
+
+  # API token expiry in seconds
+  api_token_expiry: 3600
+
+  # API rate limit (requests per minute)
+  api_rate_limit: 100
+
+# =============================================================================
+# Logging Configuration
+# =============================================================================
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+
+  # Log file path (optional)
+  # file: "./cerberus.log"
+
+  # Use JSON format for machine parsing
+  json_format: false
+
+  # Maximum log file size in MB
+  max_file_size_mb: 10
+
+  # Number of backup log files to keep
+  backup_count: 5

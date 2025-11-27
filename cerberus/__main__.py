@@ -1,10 +1,6 @@
-"""
-Point d'entrée principal pour l'exécution en module.
+"""Entry point for python -m cerberus."""
 
-Permet d'exécuter Cerberus avec: python -m cerberus
-"""
-
-from cerberus.cli.commands import main
+from cerberus.cli.commands import cli
 
 if __name__ == "__main__":
-    main()
+    cli()
