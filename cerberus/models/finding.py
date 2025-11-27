@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -342,7 +342,7 @@ class Finding:
     title: str = ""
     description: str = ""
     remediation: str = ""
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     scan_id: str = ""
     tags: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -503,7 +503,7 @@ class ScanResult:
 
     scan_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     repository: str = ""
-    started_at: datetime = field(default_factory=datetime.utcnow)
+    started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     completed_at: Optional[datetime] = None
     status: str = "running"  # running, completed, failed
 
@@ -527,7 +527,7 @@ class ScanResult:
 
     def complete(self, status: str = "completed") -> None:
         """Mark scan as complete."""
-        self.completed_at = datetime.utcnow()
+        self.completed_at = datetime.now(timezone.utc)
         self.status = status
 
     @property

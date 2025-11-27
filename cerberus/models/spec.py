@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -138,7 +138,7 @@ class DynamicSpec:
 
     repository: str = ""
     version: str = "1.0"
-    generated_at: datetime = field(default_factory=datetime.utcnow)
+    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     sources: list[TaintSpec] = field(default_factory=list)
     sinks: list[TaintSpec] = field(default_factory=list)
     sanitizers: list[TaintSpec] = field(default_factory=list)

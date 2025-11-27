@@ -119,6 +119,11 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
 ]
+filterwarnings = [
+    "ignore::FutureWarning:tree_sitter",
+    "ignore::DeprecationWarning:tree_sitter",
+    "ignore:coroutine.*was never awaited:RuntimeWarning",
+]
 
 [tool.black]
 line-length = 100

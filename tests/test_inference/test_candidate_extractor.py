@@ -4,7 +4,7 @@ Tests for Candidate Extractor.
 TDD: Write tests first, then implement to make them pass.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -137,7 +137,7 @@ def sample_repo_map(sample_symbols: list[Symbol]) -> RepoMap:
             "/app/models.py": 0.1,
             "/app/api.py": 0.05,
         },
-        generated_at=datetime.utcnow(),
+        generated_at=datetime.now(timezone.utc),
     )
 
 

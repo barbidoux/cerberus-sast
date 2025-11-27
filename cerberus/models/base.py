@@ -12,7 +12,7 @@ This module defines the fundamental data types for:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
@@ -189,12 +189,12 @@ class CodeLocation:
 class TimeRange:
     """Time range for tracking operation durations."""
 
-    start: datetime = field(default_factory=datetime.utcnow)
+    start: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     end: Optional[datetime] = None
 
     def complete(self) -> None:
         """Mark the time range as complete."""
-        self.end = datetime.utcnow()
+        self.end = datetime.now(timezone.utc)
 
     @property
     def duration_ms(self) -> Optional[float]:

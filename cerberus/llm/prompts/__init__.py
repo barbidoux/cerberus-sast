@@ -12,8 +12,19 @@ from cerberus.llm.prompts.classification import (
     SINK_EXAMPLES,
     SOURCE_EXAMPLES,
 )
+from cerberus.llm.prompts.verification import (
+    AttackerPrompt,
+    AttackerResponse,
+    DefenderPrompt,
+    DefenderResponse,
+    JudgePrompt,
+    JudgeResponse,
+    VerificationBuiltPrompt,
+    VerificationPromptBuilder,
+)
 
 __all__ = [
+    # Classification
     "BuiltPrompt",
     "ClassificationPrompt",
     "ClassificationResponse",
@@ -24,4 +35,13 @@ __all__ = [
     "SANITIZER_EXAMPLES",
     "SINK_EXAMPLES",
     "SOURCE_EXAMPLES",
+    # Verification
+    "AttackerPrompt",
+    "AttackerResponse",
+    "DefenderPrompt",
+    "DefenderResponse",
+    "JudgePrompt",
+    "JudgeResponse",
+    "VerificationBuiltPrompt",
+    "VerificationPromptBuilder",
 ]
