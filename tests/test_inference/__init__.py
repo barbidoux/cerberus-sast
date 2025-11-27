@@ -1,1 +1,1 @@
-"""Tests for Phase II: Spec Inference Engine."""
+"""Tests for Phase II Inference Engine."""
