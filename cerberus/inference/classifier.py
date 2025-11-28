@@ -407,3 +407,316 @@ class LLMClassifier:
 
         except Exception:
             return None
+
+    # =========================================================================
+    # Milestone 8: Taint Source/Sink Classification Methods
+    # =========================================================================
+
+    async def classify_taint_source(
+        self,
+        source: Any,  # TaintSource
+        code_context: str,
+        language: str = "javascript",
+    ) -> Any:  # SourceClassificationResult
+        """
+        Classify an AST-extracted taint source using LLM.
+
+        This method validates whether the AST-detected source is truly
+        a taint source (untrusted user input) and enriches it with
+        LLM-generated reasoning and refined CWE types.
+
+        Args:
+            source: TaintSource object from AST extraction
+            code_context: ~50 lines of surrounding code
+            language: Programming language
+
+        Returns:
+            SourceClassificationResult with LLM validation
+        """
+        from cerberus.llm.prompts.taint_classification import (
+            SourceClassificationResult,
+            build_source_classification_prompt,
+        )
+
+        try:
+            # Build the prompt
+            prompts = build_source_classification_prompt(
+                expression=source.expression,
+                code_context=code_context,
+                language=language,
+                line=source.line,
+                ast_source_type=source.source_type.value,
+            )
+
+            # Call LLM
+            response = await self._call_llm_raw(
+                system_prompt=prompts["system"],
+                user_prompt=prompts["user"],
+            )
+
+            # Parse response
+            result = SourceClassificationResult.from_json(response.content)
+
+            # Track stats
+            self._stats["total_classifications"] += 1
+            if result.is_source:
+                self._stats["confirmed_count"] += 1
+            else:
+                self._stats["rejected_count"] += 1
+
+            return result
+
+        except Exception as e:
+            self._stats["total_classifications"] += 1
+            self._stats["error_count"] += 1
+
+            return SourceClassificationResult(
+                is_source=True,  # Fail open - trust AST on error
+                confidence=0.5,
+                source_type=source.source_type.value,
+                cwe_types=source.cwe_types,
+                reasoning=f"LLM classification failed: {str(e)}",
+            )
+
+    async def classify_taint_sink(
+        self,
+        sink: Any,  # TaintSink
+        code_context: str,
+        language: str = "javascript",
+    ) -> Any:  # SinkClassificationResult
+        """
+        Classify an AST-extracted taint sink using LLM.
+
+        This method validates whether the AST-detected sink is truly
+        a dangerous operation and enriches it with LLM-generated
+        reasoning and sanitization detection.
+
+        Args:
+            sink: TaintSink object from AST extraction
+            code_context: ~50 lines of surrounding code
+            language: Programming language
+
+        Returns:
+            SinkClassificationResult with LLM validation
+        """
+        from cerberus.llm.prompts.taint_classification import (
+            SinkClassificationResult,
+            build_sink_classification_prompt,
+        )
+
+        try:
+            # Build the prompt
+            prompts = build_sink_classification_prompt(
+                expression=sink.expression,
+                callee=sink.callee,
+                code_context=code_context,
+                language=language,
+                line=sink.line,
+                uses_template_literal=sink.uses_template_literal,
+                ast_sink_type=sink.sink_type.value,
+            )
+
+            # Call LLM
+            response = await self._call_llm_raw(
+                system_prompt=prompts["system"],
+                user_prompt=prompts["user"],
+            )
+
+            # Parse response
+            result = SinkClassificationResult.from_json(response.content)
+
+            # Track stats
+            self._stats["total_classifications"] += 1
+            if result.is_sink:
+                self._stats["confirmed_count"] += 1
+            else:
+                self._stats["rejected_count"] += 1
+
+            return result
+
+        except Exception as e:
+            self._stats["total_classifications"] += 1
+            self._stats["error_count"] += 1
+
+            return SinkClassificationResult(
+                is_sink=True,  # Fail open - trust AST on error
+                confidence=0.5,
+                sink_type=sink.sink_type.value,
+                cwe_types=sink.cwe_types,
+                reasoning=f"LLM classification failed: {str(e)}",
+            )
+
+    async def classify_sources_batch(
+        self,
+        sources: list[Any],  # list[TaintSource]
+        code_contexts: dict[str, str],  # {location_key: code_context}
+        language: str = "javascript",
+        batch_size: int = 6,
+    ) -> list[Any]:  # list[SourceClassificationResult]
+        """
+        Classify multiple taint sources in batched LLM calls.
+
+        More efficient than individual calls for large source lists.
+
+        Args:
+            sources: List of TaintSource objects
+            code_contexts: Dict mapping source location_key to code context
+            language: Programming language
+            batch_size: Number of sources per LLM call
+
+        Returns:
+            List of SourceClassificationResult objects
+        """
+        from cerberus.llm.prompts.taint_classification import (
+            SourceClassificationResult,
+            build_batch_source_prompt,
+            parse_batch_results,
+        )
+
+        results = []
+
+        for i in range(0, len(sources), batch_size):
+            batch = sources[i:i + batch_size]
+
+            # Prepare batch data
+            batch_data = []
+            for source in batch:
+                batch_data.append({
+                    "expression": source.expression,
+                    "line": source.line,
+                    "ast_type": source.source_type.value,
+                    "code_context": code_contexts.get(source.location_key, ""),
+                })
+
+            try:
+                # Build batch prompt
+                prompts = build_batch_source_prompt(batch_data, language)
+
+                # Call LLM
+                response = await self._call_llm_raw(
+                    system_prompt=prompts["system"],
+                    user_prompt=prompts["user"],
+                )
+
+                # Parse batch results
+                batch_results = parse_batch_results(
+                    response.content,
+                    len(batch),
+                    SourceClassificationResult,
+                )
+                results.extend(batch_results)
+
+            except Exception as e:
+                # On error, return conservative results for batch
+                for source in batch:
+                    results.append(SourceClassificationResult(
+                        is_source=True,  # Fail open
+                        confidence=0.5,
+                        source_type=source.source_type.value,
+                        cwe_types=source.cwe_types,
+                        reasoning=f"Batch classification failed: {str(e)}",
+                    ))
+
+        return results
+
+    async def classify_sinks_batch(
+        self,
+        sinks: list[Any],  # list[TaintSink]
+        code_contexts: dict[str, str],  # {location_key: code_context}
+        language: str = "javascript",
+        batch_size: int = 6,
+    ) -> list[Any]:  # list[SinkClassificationResult]
+        """
+        Classify multiple taint sinks in batched LLM calls.
+
+        Args:
+            sinks: List of TaintSink objects
+            code_contexts: Dict mapping sink location_key to code context
+            language: Programming language
+            batch_size: Number of sinks per LLM call
+
+        Returns:
+            List of SinkClassificationResult objects
+        """
+        from cerberus.llm.prompts.taint_classification import (
+            SinkClassificationResult,
+            build_batch_sink_prompt,
+            parse_batch_results,
+        )
+
+        results = []
+
+        for i in range(0, len(sinks), batch_size):
+            batch = sinks[i:i + batch_size]
+
+            # Prepare batch data
+            batch_data = []
+            for sink in batch:
+                batch_data.append({
+                    "callee": sink.callee,
+                    "expression": sink.expression,
+                    "line": sink.line,
+                    "ast_type": sink.sink_type.value,
+                    "uses_template_literal": sink.uses_template_literal,
+                    "code_context": code_contexts.get(sink.location_key, ""),
+                })
+
+            try:
+                # Build batch prompt
+                prompts = build_batch_sink_prompt(batch_data, language)
+
+                # Call LLM
+                response = await self._call_llm_raw(
+                    system_prompt=prompts["system"],
+                    user_prompt=prompts["user"],
+                )
+
+                # Parse batch results
+                batch_results = parse_batch_results(
+                    response.content,
+                    len(batch),
+                    SinkClassificationResult,
+                )
+                results.extend(batch_results)
+
+            except Exception as e:
+                # On error, return conservative results for batch
+                for sink in batch:
+                    results.append(SinkClassificationResult(
+                        is_sink=True,  # Fail open
+                        confidence=0.5,
+                        sink_type=sink.sink_type.value,
+                        cwe_types=sink.cwe_types,
+                        reasoning=f"Batch classification failed: {str(e)}",
+                    ))
+
+        return results
+
+    async def _call_llm_raw(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+    ) -> LLMResponse:
+        """
+        Call LLM with raw system and user prompts.
+
+        Args:
+            system_prompt: System prompt content
+            user_prompt: User prompt content
+
+        Returns:
+            LLM response
+        """
+        if self.gateway:
+            messages = [
+                Message(role=Role.SYSTEM, content=system_prompt),
+                Message(role=Role.USER, content=user_prompt),
+            ]
+            request = LLMRequest(
+                messages=messages,
+                model=self.config.model,
+                temperature=0.0,  # Deterministic
+            )
+            return await self.gateway.complete(request)
+        else:
+            raise RuntimeError("No LLM gateway configured")

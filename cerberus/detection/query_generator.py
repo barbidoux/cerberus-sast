@@ -232,11 +232,14 @@ class QueryGenerator:
                 if source_vulns and sink_vulns:
                     vuln_types = source_vulns & sink_vulns
                     if not vuln_types:
-                        # No common types - use sink's types (more specific)
-                        vuln_types = sink_vulns
+                        # No common types - skip this source-sink pair
+                        # A source can only flow to sinks of matching vulnerability types
+                        continue
                 elif sink_vulns:
+                    # Source has no specific types - match with all sink types
                     vuln_types = sink_vulns
                 elif source_vulns:
+                    # Sink has no specific types - match with all source types
                     vuln_types = source_vulns
                 else:
                     # Neither has types - use generic data flow

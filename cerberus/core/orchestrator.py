@@ -38,6 +38,12 @@ class OrchestratorConfig:
     run_detection: bool = True
     run_verification: bool = True
 
+    # Hybrid detection mode (AST-based taint extraction)
+    use_hybrid_detection: bool = False
+    use_hybrid_ml: bool = False  # Milestone 11: ML-enhanced 3-tier pipeline (patterns → CodeBERT → LLM)
+    skip_tier3_llm: bool = False  # Fast mode: skip Tier 3 LLM for speed (patterns → CodeBERT only)
+    require_joern_for_hybrid: bool = False  # If False, use heuristic mode when Joern unavailable
+
     # Feedback loop settings
     enable_feedback_loop: bool = True
     max_feedback_iterations: int = 3  # HARD LIMIT - never exceed
@@ -157,12 +163,19 @@ class ScanOrchestrator:
     def detection_engine(self) -> DetectionEngine:
         """Lazy initialization of detection engine."""
         if self._detection_engine is None:
+            # Milestone 8: Create LLM classifier for hybrid detection
+            llm_classifier = None
+            if self.llm_gateway and self.config.use_hybrid_detection:
+                from cerberus.inference.classifier import LLMClassifier
+                llm_classifier = LLMClassifier(gateway=self.llm_gateway)
+
             self._detection_engine = DetectionEngine(
                 config=DetectionConfig(
                     min_confidence=self.config.min_confidence,
                 ),
                 joern_client=self.joern_client,
                 llm_gateway=self.llm_gateway,
+                llm_classifier=llm_classifier,  # Milestone 8: Pass classifier
             )
         return self._detection_engine
 
@@ -219,6 +232,10 @@ class ScanOrchestrator:
                 self._update_progress("complete", 1.0, "Scan complete (inference disabled)")
                 scan_result.complete()
                 return OrchestratorResult(scan_result=scan_result)
+
+            # HYBRID MODE: Use AST-based taint extraction instead of LLM inference
+            if self.config.use_hybrid_detection:
+                return await self._run_hybrid_scan(repo_map, scan_result, start_time)
 
             # Phase II: Spec Inference
             phase_start = time.time()
@@ -360,6 +377,10 @@ class ScanOrchestrator:
 
     async def _check_dependencies(self) -> None:
         """Verify required dependencies are available."""
+        # Hybrid mode with heuristic fallback doesn't require Joern
+        if self.config.use_hybrid_detection and not self.config.require_joern_for_hybrid:
+            return
+
         if self.config.run_detection:
             if not await self.joern_client.is_available():
                 raise DependencyError(
@@ -387,6 +408,113 @@ class ScanOrchestrator:
         """Run Phase III: Detection."""
         self.logger.info("Phase III: Detection")
         return await self.detection_engine.detect(spec)
+
+    async def _run_hybrid_scan(
+        self,
+        repo_map: RepoMap,
+        scan_result: ScanResult,
+        start_time: float,
+    ) -> OrchestratorResult:
+        """
+        Run hybrid detection mode using AST-based taint extraction + LLM classification.
+
+        This mode implements NEURO-SYMBOLIC analysis:
+        1. Extracts sources/sinks directly from AST (Symbolic)
+        2. LLM validates and enriches the AST findings (Neural - Milestone 8)
+        3. Creates flow candidates based on CWE matching
+        4. Validates via Joern CPG or heuristic scoring
+        """
+        use_llm = self.llm_gateway is not None
+
+        # Determine detection mode
+        if self.config.use_hybrid_ml:
+            mode_name = "ML-ENHANCED HYBRID (3-tier: patterns → CodeBERT → LLM)"
+            progress_msg = "ML-enhanced detection (Tier 1: patterns, Tier 2: CodeBERT, Tier 3: LLM)"
+        elif use_llm:
+            mode_name = "NEURO-SYMBOLIC"
+            progress_msg = "AST extraction + LLM classification"
+        else:
+            mode_name = "HYBRID (AST-only)"
+            progress_msg = "AST-based taint extraction"
+
+        self.logger.info(f"Running {mode_name} detection mode")
+
+        # Phase II: AST-based taint extraction + classification
+        phase_start = time.time()
+        self._update_progress("inference", 0.0, progress_msg)
+
+        if self.config.use_hybrid_ml:
+            # Milestone 11: ML-enhanced 3-tier pipeline
+            detection_result = await self.detection_engine.detect_hybrid_ml(
+                repo_map,
+                require_joern=self.config.require_joern_for_hybrid,
+                skip_tier3_llm=self.config.skip_tier3_llm,  # Fast mode skips LLM
+            )
+        else:
+            # Original hybrid detection (with optional LLM)
+            detection_result = await self.detection_engine.detect_hybrid(
+                repo_map,
+                require_joern=self.config.require_joern_for_hybrid,
+                use_llm=use_llm,  # Milestone 8: Enable LLM classification
+            )
+        scan_result.phase_timings["hybrid_detection"] = time.time() - phase_start
+
+        # Extract metadata about sources/sinks
+        scan_result.sources_found = detection_result.metadata.get("sources_extracted", 0)
+        scan_result.sinks_found = detection_result.metadata.get("sinks_extracted", 0)
+        scan_result.sanitizers_found = 0  # Hybrid mode doesn't extract sanitizers yet
+
+        if not detection_result.success:
+            scan_result.complete(status="failed")
+            scan_result.errors.append({
+                "phase": "hybrid_detection",
+                "error": detection_result.error,
+            })
+            return OrchestratorResult(
+                scan_result=scan_result,
+                error=detection_result.error,
+            )
+
+        # Filter findings by confidence
+        all_findings = [
+            f for f in detection_result.findings
+            if f.confidence >= self.config.min_confidence
+        ]
+
+        # Optional verification
+        if self.config.run_verification and all_findings:
+            phase_start = time.time()
+            self._update_progress("verification", 0.0, "Verifying findings")
+            verification_result = await self._run_phase_iv(all_findings)
+            scan_result.phase_timings["verification"] = time.time() - phase_start
+
+            # Use verified findings
+            all_findings = [
+                f for f in verification_result.findings
+                if f.verification is None or f.verification.verdict != Verdict.FALSE_POSITIVE
+            ]
+
+        scan_result.findings = all_findings
+        scan_result.complete()
+        scan_result.phase_timings["total"] = time.time() - start_time
+
+        self._update_progress("complete", 1.0, "Hybrid scan complete")
+
+        return OrchestratorResult(
+            scan_result=scan_result,
+            iterations_run=1,
+            converged=True,
+            metadata={
+                "detection_mode": detection_result.metadata.get("detection_mode", "hybrid"),
+                "total_duration_seconds": time.time() - start_time,
+                "candidates_created": detection_result.metadata.get("candidates_created", 0),
+                "findings_by_verdict": self._count_by_verdict(all_findings),
+                # Milestone 8: LLM metrics
+                "llm_calls": detection_result.metadata.get("llm_calls", 0),
+                "sources_validated": detection_result.metadata.get("sources_validated", 0),
+                "sinks_validated": detection_result.metadata.get("sinks_validated", 0),
+            },
+        )
 
     async def _run_phase_iv(self, findings: list[Finding]) -> Any:
         """Run Phase IV: Verification."""

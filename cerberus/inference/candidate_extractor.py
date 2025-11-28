@@ -91,6 +91,7 @@ class HeuristicMatcher:
 
     # Source patterns - functions that introduce tainted data
     SOURCE_PATTERNS: list[tuple[str, float]] = [
+        # Python/General patterns
         (r"get_.*input", 0.9),
         (r"read_.*request", 0.9),
         (r"fetch_.*param", 0.8),
@@ -107,32 +108,94 @@ class HeuristicMatcher:
         (r"fetch", 0.4),
         (r"recv", 0.4),
         (r"receive", 0.4),
+        # Express.js source patterns (req.body, req.params, req.query, etc.)
+        (r"get.*request.*body", 0.9),
+        (r"read.*request.*body", 0.9),
+        (r"request.*body", 0.8),
+        (r"get.*body", 0.7),
+        (r"read.*body", 0.7),
+        (r"get.*params", 0.7),
+        (r"read.*params", 0.7),
+        (r"route.*params", 0.6),
+        (r"get.*query", 0.7),
+        (r"parse.*query", 0.7),
+        (r"query.*string", 0.6),
+        (r"get.*header", 0.7),
+        (r"read.*headers", 0.7),
+        (r"get.*cookie", 0.8),
+        (r"parse.*cookies", 0.8),
+        (r"read.*cookie", 0.7),
+        # Angular source patterns
+        (r"route.*param", 0.6),
+        (r"activated.*route", 0.5),
+        (r"get.*data", 0.4),
+        (r"fetch.*data", 0.4),
     ]
 
     # Sink patterns - dangerous operations
     SINK_PATTERNS: list[tuple[str, float]] = [
+        # SQL injection sinks
         (r"execute.*query", 0.95),
         (r"exec.*sql", 0.95),
         (r"run.*sql", 0.9),
         (r"execute", 0.7),
         (r"query", 0.6),
+        (r"raw.*query", 0.8),
+        (r"sequelize.*query", 0.8),
+        # Command injection sinks (Python)
         (r"system.*exec", 0.95),
         (r"run.*command", 0.9),
         (r"run.*cmd", 0.9),
         (r"os\.system", 0.95),
         (r"popen", 0.9),
         (r"subprocess", 0.8),
-        (r"spawn", 0.7),
-        (r"eval", 0.8),
-        (r"innerHTML", 0.9),
+        # Command injection sinks (JavaScript - child_process)
+        (r"^exec$", 0.8),
+        (r"execsync", 0.85),
+        (r"^spawn$", 0.75),
+        (r"spawnsync", 0.8),
+        (r"execfile", 0.8),
+        (r"child.*process", 0.7),
+        # XSS sinks (JavaScript)
+        (r"innerhtml", 0.9),
+        (r"outerhtml", 0.8),
         (r"dangerously.*html", 0.95),
+        (r"dangerouslysetinnerhtml", 0.95),
+        # Angular-specific XSS sinks
+        (r"bypasssecuritytrust", 0.95),
+        (r"bypasssecuritytrusthtml", 0.95),
+        (r"bypasssecuritytrustscript", 0.95),
+        (r"bypasssecuritytruststyle", 0.9),
+        (r"bypasssecuritytrusturl", 0.9),
+        (r"bypasssecuritytrustresourceurl", 0.9),
+        # Code injection
+        (r"^eval$", 0.9),
+        (r"new.*function", 0.85),
+        (r"settimeout.*string", 0.8),
+        (r"setinterval.*string", 0.8),
+        # File system sinks (path traversal)
+        (r"readfile", 0.7),
+        (r"readfilesync", 0.75),
+        (r"writefile", 0.7),
+        (r"writefilesync", 0.75),
+        (r"unlinksync", 0.7),
         (r"write.*file", 0.6),
         (r"open", 0.4),
+        # Response sinks (Express.js)
+        (r"render", 0.5),
         (r"render.*template", 0.5),
+        (r"download", 0.5),
+        (r"sendfile", 0.6),
+        (r"send.*file", 0.5),
+        # SSRF sinks
+        (r"fetch.*url", 0.6),
+        (r"request.*url", 0.6),
+        (r"http.*get", 0.5),
     ]
 
     # Sanitizer patterns - validation and cleaning
     SANITIZER_PATTERNS: list[tuple[str, float]] = [
+        # General sanitization
         (r"sanitize", 0.95),
         (r"escape", 0.9),
         (r"clean", 0.7),
@@ -145,28 +208,58 @@ class HeuristicMatcher:
         (r"verify", 0.4),
         (r"safe", 0.5),
         (r"whitelist", 0.7),
+        # JavaScript/TypeScript specific
+        (r"escape.*html", 0.9),
+        (r"sanitize.*html", 0.95),
+        (r"purify", 0.8),
+        (r"dompurify", 0.9),
+        (r"isvalid", 0.5),
+        (r"is.*valid", 0.4),
+        (r"validate.*input", 0.9),
+        (r"express.*validator", 0.85),
+        (r"xss.*filter", 0.9),
+        (r"parameterize", 0.8),
+        (r"prepared.*statement", 0.85),
     ]
 
     # Import patterns that suggest specific candidate types
     SOURCE_IMPORTS: list[str] = [
+        # Python
         "flask", "django", "request", "fastapi",
         "tornado", "bottle", "aiohttp",
         "sys.argv", "argparse", "click",
         "os.environ", "dotenv",
+        # JavaScript/TypeScript
+        "express", "koa", "hapi", "restify", "fastify",
+        "body-parser", "cookie-parser",
+        "@angular/router", "activatedroute",
+        "querystring", "url",
     ]
 
     SINK_IMPORTS: list[str] = [
+        # Python
         "sqlite3", "mysql", "psycopg", "pymongo",
         "sqlalchemy", "peewee",
         "subprocess", "os.system", "shlex",
         "eval", "exec",
         "jinja2", "mako", "template",
+        # JavaScript/TypeScript
+        "sequelize", "mysql2", "pg", "mongodb", "mongoose",
+        "child_process", "shelljs",
+        "fs", "path",
+        "ejs", "pug", "handlebars", "mustache",
+        "@angular/platform-browser", "domsanitizer",
     ]
 
     SANITIZER_IMPORTS: list[str] = [
+        # Python
         "html.escape", "markupsafe", "bleach",
         "validators", "cerberus", "pydantic",
         "re", "regex",
+        # JavaScript/TypeScript
+        "dompurify", "sanitize-html", "xss",
+        "validator", "express-validator", "joi",
+        "escape-html", "he",
     ]
 
     def match_source_pattern(self, name: str) -> float:

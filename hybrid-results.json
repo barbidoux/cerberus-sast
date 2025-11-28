@@ -1,0 +1,970 @@
+╭──────────────── Scan Summary ─────────────────╮
+│ Cerberus SAST Scan Report                     │
+│                                               │
+│ Repository: cerberus-scan                     │
+│ Scan ID: 553bdd9d-6033-44c4-9310-7b783f997f87 │
+│ Status: COMPLETED                             │
+│ Duration: 169.20s                             │
+╰───────────────────────────────────────────────╯
+     Scan Statistics      
+┏━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Metric         ┃ Value ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ Files Scanned  │    12 │
+│ Lines Analyzed │   850 │
+│ Total Findings │    84 │
+└────────────────┴───────┘
+
+Spec Inference Results
+┏━━━━━━━━━━━━┳━━━━━━━┓
+┃ Type       ┃ Count ┃
+┡━━━━━━━━━━━━╇━━━━━━━┩
+│ Sources    │    54 │
+│ Sinks      │    42 │
+│ Sanitizers │     0 │
+└────────────┴───────┘
+
+Findings by Severity
+┏━━━━━━━━━━┳━━━━━━━┓
+┃ Severity ┃ Count ┃
+┡━━━━━━━━━━╇━━━━━━━┩
+│ CRITICAL │    24 │
+│ HIGH     │    60 │
+└──────────┴───────┘
+
+Findings:
+
+1. [CRITICAL] CWE-94
+   Potential Code Injection vulnerability detected. User input from 
+'req.query.url' flows to dangerous sink 'eval()' at line 57.
+   Source: req.query.url 
+(tests/fixtures/vulnerable_express_app/backend/app.js:47)
+   Sink: eval (tests/fixtures/vulnerable_express_app/backend/app.js:57)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/app.js:47
+└── sink: tests/fixtures/vulnerable_express_app/backend/app.js:57
+
+2. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses
+a template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14
+
+3. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'execSync()' at line 26.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13)
+   Sink: execSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26
+
+4. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses
+a template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42
+
+5. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses
+a template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:13
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73
+
+6. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.cmd' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink
+uses a template literal, indicating direct string interpolation of user input.
+   Source: req.query.cmd 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14
+
+7. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.cmd' flows to dangerous sink 'execSync()' at line 26.
+   Source: req.query.cmd 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25)
+   Sink: execSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26
+
+8. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.cmd' flows to dangerous sink 'spawn()' at line 33.
+   Source: req.query.cmd 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25)
+   Sink: spawn 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33
+
+9. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.cmd' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink
+uses a template literal, indicating direct string interpolation of user input.
+   Source: req.query.cmd 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42
+
+10. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.cmd' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink
+uses a template literal, indicating direct string interpolation of user input.
+   Source: req.query.cmd 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:25
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73
+
+11. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses
+a template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14
+
+12. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'execSync()' at line 26.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32)
+   Sink: execSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26
+
+13. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'spawn()' at line 33.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32)
+   Sink: spawn 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33
+
+14. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses
+a template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42
+
+15. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.body' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses
+a template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:32
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73
+
+16. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.host' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The 
+sink uses a template literal, indicating direct string interpolation of user 
+input.
+   Source: req.query.host 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14
+
+17. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.host' flows to dangerous sink 'execSync()' at line 26.
+   Source: req.query.host 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41)
+   Sink: execSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:26
+
+18. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.host' flows to dangerous sink 'spawn()' at line 33.
+   Source: req.query.host 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41)
+   Sink: spawn 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33
+
+19. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.host' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The 
+sink uses a template literal, indicating direct string interpolation of user 
+input.
+   Source: req.query.host 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42
+
+20. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query.host' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The 
+sink uses a template literal, indicating direct string interpolation of user 
+input.
+   Source: req.query.host 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:41
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73
+
+21. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 
+'req.query.file' flows to dangerous sink 'readFileSync()' at line 51.
+   Source: req.query.file 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49)
+   Sink: readFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:51)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:51
+
+22. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 
+'req.query.file' flows to dangerous sink 'writeFileSync()' at line 66.
+   Source: req.query.file 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49)
+   Sink: writeFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66
+
+23. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink 
+uses a template literal, indicating direct string interpolation of user input.
+   Source: req.query 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:14
+
+24. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query' flows to dangerous sink 'spawn()' at line 33.
+   Source: req.query 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49)
+   Sink: spawn 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:33
+
+25. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink 
+uses a template literal, indicating direct string interpolation of user input.
+   Source: req.query 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:42
+
+26. [CRITICAL] CWE-78
+   Potential Command Injection vulnerability detected. User input from 
+'req.query' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink 
+uses a template literal, indicating direct string interpolation of user input.
+   Source: req.query 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49)
+   Sink: exec (tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:49
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:73
+
+27. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 
+'req.query.path' flows to dangerous sink 'readFileSync()' at line 51.
+   Source: req.query.path 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:57)
+   Sink: readFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:51)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:57
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:51
+
+28. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 
+'req.query.path' flows to dangerous sink 'writeFileSync()' at line 66.
+   Source: req.query.path 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:57)
+   Sink: writeFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:57
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66
+
+29. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'readFileSync()' at line 51.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:64)
+   Sink: readFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:51)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:64
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:51
+
+30. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'writeFileSync()' at line 66.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:64)
+   Sink: writeFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:64
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66
+
+31. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'writeFileSync()' at line 66.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:72)
+   Sink: writeFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:72
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66
+
+32. [HIGH] CWE-22
+   Potential Path Traversal vulnerability detected. User input from 
+'req.query.dir' flows to dangerous sink 'writeFileSync()' at line 66.
+   Source: req.query.dir 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:80)
+   Sink: writeFileSync 
+(tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:80
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/admin.js:66
+
+33. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.query' 
+flows to dangerous sink 'query()' at line 14.
+   Source: req.query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:12)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:14)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:12
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:14
+
+34. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.query' 
+flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:12)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:12
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:21
+
+35. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.query' 
+flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:12)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:70)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:12
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:70
+
+36. [HIGH] CWE-918
+   Potential Server-Side Request Forgery (SSRF) vulnerability detected. User 
+input from 'req.params.id' flows to dangerous sink 'fetch()' at line 39.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:20)
+   Sink: fetch 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:39)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:20
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:39
+
+37. [HIGH] CWE-918
+   Potential Server-Side Request Forgery (SSRF) vulnerability detected. User 
+input from 'req.body' flows to dangerous sink 'fetch()' at line 39.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:38)
+   Sink: fetch 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:39)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:38
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:39
+
+38. [HIGH] CWE-918
+   Potential Server-Side Request Forgery (SSRF) vulnerability detected. User 
+input from 'req.body' flows to dangerous sink 'fetch()' at line 48.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:38)
+   Sink: fetch 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:48)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:38
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:48
+
+39. [HIGH] CWE-918
+   Potential Server-Side Request Forgery (SSRF) vulnerability detected. User 
+input from 'req.body' flows to dangerous sink 'fetch()' at line 39.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:47)
+   Sink: fetch 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:39)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:47
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:39
+
+40. [HIGH] CWE-918
+   Potential Server-Side Request Forgery (SSRF) vulnerability detected. User 
+input from 'req.body' flows to dangerous sink 'fetch()' at line 48.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:47)
+   Sink: fetch 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:48)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:47
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:48
+
+41. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:58)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:58
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:21
+
+42. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:58)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:70)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:58
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:70
+
+43. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:68)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:68
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:21
+
+44. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:68)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:70)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:68
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:70
+
+45. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 81.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:68)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:81)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:68
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:81
+
+46. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:78)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:78
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:21
+
+47. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a 
+template literal, indicating direct string interpolation of user input.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:78)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:70)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:78
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:70
+
+48. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 81.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:78)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/products.js:81)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/products.js:78
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/products.js:81
+
+49. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.query.name' flows to dangerous sink 'query()' at line 13.
+   Source: req.query.name 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:11)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:13)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:11
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:13
+
+50. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.query.name' flows to dangerous sink 'query()' at line 21.
+   Source: req.query.name 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:11)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:11
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:21
+
+51. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.query.name' flows to dangerous sink 'query()' at line 29.
+   Source: req.query.name 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:11)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:29)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:11
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:29
+
+52. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 13.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:19)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:13)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:19
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:13
+
+53. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 21.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:19)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:19
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:21
+
+54. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 29.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:19)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:29)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:19
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:29
+
+55. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 13.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:27)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:13)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:27
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:13
+
+56. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 21.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:27)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:27
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:21
+
+57. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 29.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:27)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:29)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:27
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:29
+
+58. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 42.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:27)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:27
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:42
+
+59. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 21.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:39)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:39
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:21
+
+60. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 29.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:39)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:29)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:39
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:29
+
+61. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 42.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:39)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:39
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:42
+
+62. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 50.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:39)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:50)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:39
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:50
+
+63. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 58.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:39)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:58)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:39
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:58
+
+64. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 21.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:40)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:21)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:40
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:21
+
+65. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 29.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:40)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:29)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:40
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:29
+
+66. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 42.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:40)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:40
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:42
+
+67. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 50.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:40)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:50)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:40
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:50
+
+68. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 58.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:40)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:58)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:40
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:58
+
+69. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 29.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:48)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:29)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:48
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:29
+
+70. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 42.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:48)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:48
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:42
+
+71. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 50.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:48)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:50)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:48
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:50
+
+72. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 58.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:48)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:58)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:48
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:58
+
+73. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.query.sort' flows to dangerous sink 'query()' at line 42.
+   Source: req.query.sort 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:56)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:42)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:56
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:42
+
+74. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.query.sort' flows to dangerous sink 'query()' at line 50.
+   Source: req.query.sort 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:56)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:50)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:56
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:50
+
+75. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.query.sort' flows to dangerous sink 'query()' at line 58.
+   Source: req.query.sort 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:56)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:58)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:56
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:58
+
+76. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.query.sort' flows to dangerous sink 'query()' at line 75.
+   Source: req.query.sort 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:56)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:75)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:56
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:75
+
+77. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 50.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:64)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:50)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:64
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:50
+
+78. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 58.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:64)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:58)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:64
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:58
+
+79. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 75.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:64)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:75)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:64
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:75
+
+80. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 50.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:65)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:50)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:65
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:50
+
+81. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 58.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:65)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:58)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:65
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:58
+
+82. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 'req.body' 
+flows to dangerous sink 'query()' at line 75.
+   Source: req.body 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:65)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:75)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:65
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:75
+
+83. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 58.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:74)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:58)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:74
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:58
+
+84. [HIGH] CWE-89
+   Potential SQL Injection vulnerability detected. User input from 
+'req.params.id' flows to dangerous sink 'query()' at line 75.
+   Source: req.params.id 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:74)
+   Sink: query 
+(tests/fixtures/vulnerable_express_app/backend/routes/users.js:75)
+Trace:
+├── source: tests/fixtures/vulnerable_express_app/backend/routes/users.js:74
+└── sink: tests/fixtures/vulnerable_express_app/backend/routes/users.js:75
+

@@ -1,0 +1,113 @@
+# JavaScript/Node.js Source Rules
+# These patterns identify user-controlled input that enters the application.
+
+sources:
+  # Express.js Request Sources
+  - name: req_body
+    pattern: "req\\.body(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: REQUEST_BODY
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-79]
+    description: "Express.js request body parameter - POST/PUT data"
+    language: javascript
+
+  - name: req_params
+    pattern: "req\\.params(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: REQUEST_PARAMS
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-22]
+    description: "Express.js URL path parameter - route parameters like :id"
+    language: javascript
+
+  - name: req_query
+    pattern: "req\\.query(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: REQUEST_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89, CWE-78, CWE-918]
+    description: "Express.js query string parameter - ?key=value"
+    language: javascript
+
+  - name: req_headers
+    pattern: "req\\.headers(\\.[a-zA-Z_-][a-zA-Z0-9_-]*)?"
+    type: REQUEST_HEADERS
+    confidence: 0.85
+    cwe_types: [CWE-79]
+    description: "HTTP request headers"
+    language: javascript
+
+  - name: req_cookies
+    pattern: "req\\.cookies(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: REQUEST_COOKIES
+    confidence: 0.85
+    cwe_types: [CWE-79]
+    description: "HTTP cookies from request"
+    language: javascript
+
+  # Koa.js Sources
+  - name: koa_body
+    pattern: "ctx\\.request\\.body(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: REQUEST_BODY
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-79]
+    description: "Koa.js request body"
+    language: javascript
+
+  - name: koa_query
+    pattern: "ctx\\.query(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: REQUEST_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89, CWE-78, CWE-918]
+    description: "Koa.js query parameters"
+    language: javascript
+
+  - name: koa_params
+    pattern: "ctx\\.params(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: REQUEST_PARAMS
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-22]
+    description: "Koa.js route parameters"
+    language: javascript
+
+  # Environment Variables
+  - name: process_env
+    pattern: "process\\.env(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: ENVIRONMENT
+    confidence: 0.80
+    cwe_types: [CWE-78]
+    description: "Node.js environment variables - potentially attacker-controlled"
+    language: javascript
+
+  # WebSocket Sources
+  - name: websocket_message
+    pattern: "(message\\.data|event\\.data|data\\.payload)"
+    type: USER_INPUT
+    confidence: 0.85
+    cwe_types: [CWE-89, CWE-78, CWE-79]
+    description: "WebSocket message data"
+    language: javascript
+
+  # File Upload
+  - name: req_file
+    pattern: "req\\.(file|files)(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: FILE_INPUT
+    confidence: 0.90
+    cwe_types: [CWE-22, CWE-434]
+    description: "Multer/Express file upload"
+    language: javascript
+
+  # GraphQL Sources
+  - name: graphql_args
+    pattern: "args(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: USER_INPUT
+    confidence: 0.85
+    cwe_types: [CWE-89, CWE-79]
+    description: "GraphQL resolver arguments"
+    language: javascript
+
+  - name: graphql_input
+    pattern: "input(\\.[a-zA-Z_][a-zA-Z0-9_]*)?"
+    type: USER_INPUT
+    confidence: 0.80
+    cwe_types: [CWE-89, CWE-79]
+    description: "GraphQL input types"
+    language: javascript

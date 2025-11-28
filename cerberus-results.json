@@ -1,0 +1,3542 @@
+{
+  "metadata": {
+    "tool": {
+      "name": "Cerberus SAST",
+      "version": "1.0.0"
+    },
+    "scan": {
+      "id": "a8733b4a-dab5-42d8-9c85-e8c518e73d5f",
+      "repository": "cerberus-scan",
+      "status": "completed",
+      "started_at": "2025-11-28T15:35:43.766151+00:00",
+      "completed_at": "2025-11-28T15:35:43.924168+00:00",
+      "duration_seconds": 0.158017
+    },
+    "generated_at": "2025-11-28T15:35:43.932951+00:00"
+  },
+  "summary": {
+    "files_scanned": 12,
+    "lines_scanned": 850,
+    "total_findings": 103,
+    "by_severity": {
+      "high": 64,
+      "medium": 11,
+      "critical": 28
+    },
+    "by_verdict": {
+      "true_positive": 0,
+      "false_positive": 0,
+      "uncertain": 0,
+      "unverified": 103
+    },
+    "spec_inference": {
+      "sources": 54,
+      "sinks": 88,
+      "sanitizers": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "7a57f999-f0f6-4a88-b050-3044e5f7032f",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.q' flows to dangerous sink 'get()' at line 34. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.q",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 35
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 34
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 35,
+          "column": 18,
+          "code": "req.query.q",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 34,
+          "column": 0,
+          "code": "app.get('/search', (req, res) => {\n    const query = req.query.q;\n    res.send(`<html><body><h1>Sear",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "b53ab6c6-7dbc-4943-8b67-be9467646451",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.q' flows to dangerous sink 'get()' at line 40. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.q",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 35
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 40
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 35,
+          "column": 18,
+          "code": "req.query.q",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 40,
+          "column": 0,
+          "code": "app.get('/welcome/:name', (req, res) => {\n    const name = req.params.name;\n    res.send(`<html><bod",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "cf9ed557-fbdc-40f0-91be-6151e544f38f",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.url' flows to dangerous sink 'fetch()' at line 49.",
+      "source": {
+        "method": "req.query.url",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 47
+      },
+      "sink": {
+        "method": "fetch",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 49
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 47,
+          "column": 16,
+          "code": "req.query.url",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 49,
+          "column": 27,
+          "code": "fetch(url)",
+          "description": "Dangerous sink: fetch()"
+        }
+      ]
+    },
+    {
+      "id": "a070dedd-3615-48e3-88b3-89f4b7f193fc",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 36. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 63
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 36
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 63,
+          "column": 35,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 36,
+          "column": 4,
+          "code": "res.send(`<html><body><h1>Search results for: ${query}</h1></body></html>`)",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "92c9a4f5-95d4-43ff-92e7-eea34a65fa6f",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 63
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 63,
+          "column": 35,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 42,
+          "column": 4,
+          "code": "res.send(`<html><body><h1>Welcome, ${name}!</h1></body></html>`)",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "513e7eb9-624e-4f41-8dd0-1d911ab763b9",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 13
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 13,
+          "column": 25,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "ee6f348f-af80-443f-bfe4-7b04c736885b",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.host' flows to dangerous sink 'get()' at line 40. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.host",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 41
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 40
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 41,
+          "column": 17,
+          "code": "req.query.host",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 40,
+          "column": 0,
+          "code": "router.get('/ping', (req, res) => {\n    const host = req.query.host;\n    exec(`ping -c 4 ${host}`, (",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "095438c7-1bb9-4770-a1fc-684fe587bed2",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.host' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.host",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 41
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 41,
+          "column": 17,
+          "code": "req.query.host",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "eff26c35-49a3-4092-9c78-283b55cba1a1",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.file' flows to dangerous sink 'post()' at line 12. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.file",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 49
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 12
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 49,
+          "column": 21,
+          "code": "req.query.file",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 12,
+          "column": 0,
+          "code": "router.post('/backup', (req, res) => {\n    const { filename } = req.body;\n    exec(`tar -czf /backup",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "cce87ab2-85d2-4f67-b8ca-50b6e203a3e9",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.file' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.file",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 49
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 49,
+          "column": 21,
+          "code": "req.query.file",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "0060d7e7-7a6e-4cd9-8c40-65eb76dbf3dc",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.file' flows to dangerous sink 'get()' at line 56. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.file",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 49
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 56
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 49,
+          "column": 21,
+          "code": "req.query.file",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 56,
+          "column": 0,
+          "code": "router.get('/download', (req, res) => {\n    const requestedFile = req.query.path;\n    const filePath",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "03233057-ab42-4e00-9322-550f624be3ed",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.path' flows to dangerous sink 'get()' at line 56. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.path",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 57
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 56
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 57,
+          "column": 26,
+          "code": "req.query.path",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 56,
+          "column": 0,
+          "code": "router.get('/download', (req, res) => {\n    const requestedFile = req.query.path;\n    const filePath",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "f21fec9b-aa32-4776-a4a9-4e051cf94913",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 72
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 72,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "4b64951a-082a-4892-9339-d45a6f9094cb",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query' flows to dangerous sink 'get()' at line 11. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 12
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 11
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 12,
+          "column": 45,
+          "code": "req.query",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 11,
+          "column": 0,
+          "code": "router.get('/search', async (req, res) => {\n    const { category, minPrice, maxPrice } = req.query;\n",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "2d04a37e-d55d-4220-9ce1-50eabc3b8049",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.query' flows to dangerous sink 'query()' at line 14.",
+      "source": {
+        "method": "req.query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 12
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 12,
+          "column": 45,
+          "code": "req.query",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 14,
+          "column": 27,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "8503830e-6b01-417c-a7db-0fa8f7b71ec5",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query' flows to dangerous sink 'get()' at line 19. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 12
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 19
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 12,
+          "column": 45,
+          "code": "req.query",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 19,
+          "column": 0,
+          "code": "router.get('/:id/render', async (req, res) => {\n    const productId = req.params.id;\n    const [prod",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "7e13a544-fd76-4ae6-9c25-6fe8409cf8be",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.query' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 12
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 12,
+          "column": 45,
+          "code": "req.query",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "155b984d-a0cc-4920-9261-f8e4138db827",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.query' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 12
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 12,
+          "column": 45,
+          "code": "req.query",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "ee52c8a9-f6a3-4262-84dd-d4fb646dfd1f",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 20
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 20,
+          "column": 22,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "4ea83e95-c8b7-45ac-a25d-859d969d15b9",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 20
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 20,
+          "column": 22,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "6ecadd41-8004-4bd0-88bb-d1254e91676b",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 23. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 38
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 23
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 38,
+          "column": 25,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 23,
+          "column": 8,
+          "code": "res.send(`\n            <html>\n                <body>\n                    <h1>${product.name}</h1>\n  ",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "67229ac5-84f4-480e-b17e-e49d2ff6a824",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 23. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 47
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 23
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 47,
+          "column": 36,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 23,
+          "column": 8,
+          "code": "res.send(`\n            <html>\n                <body>\n                    <h1>${product.name}</h1>\n  ",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "2163e92f-1d63-43f2-bdb4-4ac1a8151cf3",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 23. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 58
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 23
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 58,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 23,
+          "column": 8,
+          "code": "res.send(`\n            <html>\n                <body>\n                    <h1>${product.name}</h1>\n  ",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "d2d41d22-db8a-40a6-b8ac-8c048b9882fc",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 67
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 67,
+          "column": 22,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "61c6e184-a1d8-41a2-a25d-6c9ec304e8cc",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 67
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 67,
+          "column": 22,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "16a845bf-5c0c-4425-85fb-b4e58bf1fc77",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 23. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 68
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 23
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 68,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 23,
+          "column": 8,
+          "code": "res.send(`\n            <html>\n                <body>\n                    <h1>${product.name}</h1>\n  ",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "b16f4d08-323d-4e85-9c92-1b667208a2bd",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 68
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 68,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "0ef81299-35a0-4638-820b-2ecb2e0d1daa",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 23. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 78
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 23
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 78,
+          "column": 20,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 23,
+          "column": 8,
+          "code": "res.send(`\n            <html>\n                <body>\n                    <h1>${product.name}</h1>\n  ",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "c3681c5c-65bb-48c1-b649-791af24c4723",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.name' flows to dangerous sink 'get()' at line 10. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.name",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 11
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 10
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 11,
+          "column": 23,
+          "code": "req.query.name",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 10,
+          "column": 0,
+          "code": "router.get('/search', async (req, res) => {\n    const searchTerm = req.query.name;\n    const query =",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "ddde4078-fc85-49a4-bde5-90c7686a411e",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.name' flows to dangerous sink 'post()' at line 26. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.name",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 11
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 26
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 11,
+          "column": 23,
+          "code": "req.query.name",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 26,
+          "column": 0,
+          "code": "router.post('/login', async (req, res) => {\n    const { username, password } = req.body;\n    const q",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "0866e8ec-92da-43b2-99d1-aeb4f2efce0f",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.sort' flows to dangerous sink 'get()' at line 55. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.sort",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 55
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 56,
+          "column": 19,
+          "code": "req.query.sort",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 55,
+          "column": 0,
+          "code": "router.get('/list', async (req, res) => {\n    const sortBy = req.query.sort || 'id';\n    const query",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "17434f38-f9c6-4c0d-83bd-d3fb635c4ed6",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 75.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 74
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 75
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 74,
+          "column": 19,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 75,
+          "column": 23,
+          "code": "sequelize.query(\n        'SELECT * FROM users WHERE id = ?',\n        { replacements: [userId] }\n    ",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "95e07d21-a586-44d1-9492-2f1d2f9192f8",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.url' flows to dangerous sink 'get()' at line 34. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.url",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 47
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 34
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 47,
+          "column": 16,
+          "code": "req.query.url",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 34,
+          "column": 0,
+          "code": "app.get('/search', (req, res) => {\n    const query = req.query.q;\n    res.send(`<html><body><h1>Sear",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "bc4bad54-5963-4a4b-97f3-ec0f84beca84",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.url' flows to dangerous sink 'get()' at line 40. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.url",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 47
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 40
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 47,
+          "column": 16,
+          "code": "req.query.url",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 40,
+          "column": 0,
+          "code": "app.get('/welcome/:name', (req, res) => {\n    const name = req.params.name;\n    res.send(`<html><bod",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "7c1b2e49-7410-490e-a657-cc31c0343ddc",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.url' flows to dangerous sink 'get()' at line 46.",
+      "source": {
+        "method": "req.query.url",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 47
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 46
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 47,
+          "column": 16,
+          "code": "req.query.url",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 46,
+          "column": 0,
+          "code": "app.get('/fetch', async (req, res) => {\n    const url = req.query.url;\n    const fetch = require('no",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "9183cdbd-e1c8-4b0f-97b4-0ec1eb326f85",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body.expression' flows to dangerous sink 'send()' at line 36. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body.expression",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 36
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 56,
+          "column": 23,
+          "code": "req.body.expression",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 36,
+          "column": 4,
+          "code": "res.send(`<html><body><h1>Search results for: ${query}</h1></body></html>`)",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "0a4b9a5f-14f6-45fc-be0a-367f07c2052c",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body.expression' flows to dangerous sink 'send()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body.expression",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 56,
+          "column": 23,
+          "code": "req.body.expression",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 42,
+          "column": 4,
+          "code": "res.send(`<html><body><h1>Welcome, ${name}!</h1></body></html>`)",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "60ca9864-49c0-4055-a852-374f5901860f",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body.expression' flows to dangerous sink 'send()' at line 51.",
+      "source": {
+        "method": "req.body.expression",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+        "line": 51
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 56,
+          "column": 23,
+          "code": "req.body.expression",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/app.js",
+          "line": 51,
+          "column": 4,
+          "code": "res.send(data)",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "e2e0246b-1f10-4576-bc6e-ec445154c4ff",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 13
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 13,
+          "column": 25,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "db4eb9cb-4924-48be-9321-ef8f687a4ed8",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.cmd' flows to dangerous sink 'post()' at line 12. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.cmd",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 25
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 12
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 25,
+          "column": 20,
+          "code": "req.query.cmd",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 12,
+          "column": 0,
+          "code": "router.post('/backup', (req, res) => {\n    const { filename } = req.body;\n    exec(`tar -czf /backup",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "945f89d7-30a0-430a-9ea5-561d5279212f",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.cmd' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.cmd",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 25
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 25,
+          "column": 20,
+          "code": "req.query.cmd",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "2bf9a6ba-e42d-4341-85d7-f5af096e9547",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.cmd' flows to dangerous sink 'execSync()' at line 26.",
+      "source": {
+        "method": "req.query.cmd",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 25
+      },
+      "sink": {
+        "method": "execSync",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 26
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 25,
+          "column": 20,
+          "code": "req.query.cmd",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 26,
+          "column": 19,
+          "code": "execSync(command)",
+          "description": "Dangerous sink: execSync()"
+        }
+      ]
+    },
+    {
+      "id": "b0890205-8bb2-4f59-85ca-b224605f49ad",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.cmd' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.cmd",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 25
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 25,
+          "column": 20,
+          "code": "req.query.cmd",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "e820b459-0237-4524-aa1c-9ad1c4da8dba",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.cmd' flows to dangerous sink 'get()' at line 56. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.cmd",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 25
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 56
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 25,
+          "column": 20,
+          "code": "req.query.cmd",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 56,
+          "column": 0,
+          "code": "router.get('/download', (req, res) => {\n    const requestedFile = req.query.path;\n    const filePath",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "7dae69da-c931-49f0-b65e-f2a540deb3a2",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.cmd' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.cmd",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 25
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 25,
+          "column": 20,
+          "code": "req.query.cmd",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "89955007-310e-48e9-a076-cf4c67bcaaa9",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 32
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 32,
+          "column": 38,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "07fafe7e-697e-45c9-8897-f319aab6efe2",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'spawn()' at line 33.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 32
+      },
+      "sink": {
+        "method": "spawn",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 33
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 32,
+          "column": 38,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 33,
+          "column": 20,
+          "code": "spawn('convert', [inputFile, outputFile])",
+          "description": "Dangerous sink: spawn()"
+        }
+      ]
+    },
+    {
+      "id": "5c8d1528-a0d7-478b-8f83-144b8bdd8ab0",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 32
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 32,
+          "column": 38,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "adb7a019-5d8d-49e2-8c40-3c5f9c4c7f83",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 32
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 32,
+          "column": 38,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "c851fce7-ecad-430e-b743-6c6a75376905",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.host' flows to dangerous sink 'post()' at line 12. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.host",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 41
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 12
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 41,
+          "column": 17,
+          "code": "req.query.host",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 12,
+          "column": 0,
+          "code": "router.post('/backup', (req, res) => {\n    const { filename } = req.body;\n    exec(`tar -czf /backup",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "d767fa99-8b55-4caf-ab54-51d622fb2d3a",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.host' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.host",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 41
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 41,
+          "column": 17,
+          "code": "req.query.host",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "878adc80-fcc0-4504-9fed-25f091610fe4",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.host' flows to dangerous sink 'get()' at line 56. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.host",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 41
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 56
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 41,
+          "column": 17,
+          "code": "req.query.host",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 56,
+          "column": 0,
+          "code": "router.get('/download', (req, res) => {\n    const requestedFile = req.query.path;\n    const filePath",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "5d86320e-a69d-4544-93fa-b9f32e060857",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.host' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.host",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 41
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 41,
+          "column": 17,
+          "code": "req.query.host",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "6630d8a2-7733-4dbf-a8c3-8288606fc28f",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.file' flows to dangerous sink 'get()' at line 40. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.file",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 49
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 40
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 49,
+          "column": 21,
+          "code": "req.query.file",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 40,
+          "column": 0,
+          "code": "router.get('/ping', (req, res) => {\n    const host = req.query.host;\n    exec(`ping -c 4 ${host}`, (",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "d2d56333-b6b1-4dd3-b248-24989e489df4",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.file' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.file",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 49
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 49,
+          "column": 21,
+          "code": "req.query.file",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "bc20bdca-e3f3-43ad-a55f-6a5ff3f460bf",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.file' flows to dangerous sink 'get()' at line 48.",
+      "source": {
+        "method": "req.query.file",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 49
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 48
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 49,
+          "column": 21,
+          "code": "req.query.file",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 48,
+          "column": 0,
+          "code": "router.get('/logs', (req, res) => {\n    const filename = req.query.file;\n    const logPath = path.jo",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "7508ef70-782c-4c47-becc-28cff6c842a4",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.file' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.file",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 49
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 49,
+          "column": 21,
+          "code": "req.query.file",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "50044bda-6f66-4691-812e-0995738bdd9b",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.path' flows to dangerous sink 'post()' at line 12. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.path",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 57
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 12
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 57,
+          "column": 26,
+          "code": "req.query.path",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 12,
+          "column": 0,
+          "code": "router.post('/backup', (req, res) => {\n    const { filename } = req.body;\n    exec(`tar -czf /backup",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "adaafe7d-226f-4e2e-9fe7-9f264836d37d",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.path' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.path",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 57
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 57,
+          "column": 26,
+          "code": "req.query.path",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "35d5814b-6bd4-4498-8daf-18419aa1b9ae",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.path' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.path",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 57
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 57,
+          "column": 26,
+          "code": "req.query.path",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "91274745-593a-4d4d-9184-891fe81c0f3d",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.path' flows to dangerous sink 'get()' at line 48.",
+      "source": {
+        "method": "req.query.path",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 57
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 48
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 57,
+          "column": 26,
+          "code": "req.query.path",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 48,
+          "column": 0,
+          "code": "router.get('/logs', (req, res) => {\n    const filename = req.query.file;\n    const logPath = path.jo",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "ea015846-ae28-435c-96c8-9477cdc0b850",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.path' flows to dangerous sink 'post()' at line 63.",
+      "source": {
+        "method": "req.query.path",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 57
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 63
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 57,
+          "column": 26,
+          "code": "req.query.path",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 63,
+          "column": 0,
+          "code": "router.post('/save-config', (req, res) => {\n    const { filename, content } = req.body;\n    const co",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "9f6365e1-a718-4229-955f-1499616b6506",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.path' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.path",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 57
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 57,
+          "column": 26,
+          "code": "req.query.path",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "f8addda1-1453-4331-b119-519103699423",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 64
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 64,
+          "column": 34,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "a3b11ab1-71ed-42a5-b545-7a1f314b293d",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 64
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 64,
+          "column": 34,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "16733af8-2ff1-439e-92a3-66da080762f6",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 64
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 64,
+          "column": 34,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "4b93a0b0-054f-4393-915d-88bab097f03e",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 72
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 72,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "cd1c61d3-442a-4bb5-8d41-428a776ba646",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 72
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 72,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "991c5dcb-3e5b-42bf-91e3-487088da2ede",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.dir' flows to dangerous sink 'post()' at line 12. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.dir",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 80
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 12
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 80,
+          "column": 16,
+          "code": "req.query.dir",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 12,
+          "column": 0,
+          "code": "router.post('/backup', (req, res) => {\n    const { filename } = req.body;\n    exec(`tar -czf /backup",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "84ce155c-2dda-4f77-b64d-603e32babc61",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.dir' flows to dangerous sink 'exec()' at line 14. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.dir",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 80
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 14
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 80,
+          "column": 16,
+          "code": "req.query.dir",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 14,
+          "column": 4,
+          "code": "exec(`tar -czf /backups/${filename}.tar.gz /data`, (error, stdout, stderr) => {\n        if (error) {",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "daffa02f-7818-40ee-9f77-ab13e97377a1",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.dir' flows to dangerous sink 'exec()' at line 42. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.dir",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 80
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 80,
+          "column": 16,
+          "code": "req.query.dir",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 42,
+          "column": 4,
+          "code": "exec(`ping -c 4 ${host}`, (error, stdout) => {\n        res.json({ output: stdout || error.message })",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "d8c82e0f-0219-4841-b4db-5cf28eed6170",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.dir' flows to dangerous sink 'get()' at line 56. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.dir",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 80
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 56
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 80,
+          "column": 16,
+          "code": "req.query.dir",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 56,
+          "column": 0,
+          "code": "router.get('/download', (req, res) => {\n    const requestedFile = req.query.path;\n    const filePath",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "10d60da4-8453-4697-9bb0-27a1e3c2c6f0",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.dir' flows to dangerous sink 'post()' at line 71. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.dir",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 80
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 71
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 80,
+          "column": 16,
+          "code": "req.query.dir",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 71,
+          "column": 0,
+          "code": "router.post('/git-clone', (req, res) => {\n    const { repoUrl, branch } = req.body;\n    exec(`git cl",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "4ee4e16c-ab78-4418-ae3c-fc228fb0405a",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential Command Injection vulnerability detected. User input from 'req.query.dir' flows to dangerous sink 'exec()' at line 73. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.dir",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 80
+      },
+      "sink": {
+        "method": "exec",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 73
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 80,
+          "column": 16,
+          "code": "req.query.dir",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 73,
+          "column": 4,
+          "code": "exec(`git clone -b ${branch} ${repoUrl} /tmp/repo`, (error, stdout, stderr) => {\n        res.json({ ",
+          "description": "Dangerous sink: exec()"
+        }
+      ]
+    },
+    {
+      "id": "369630ca-3fab-45ab-ad5e-5f1d7f0036db",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.dir' flows to dangerous sink 'get()' at line 79.",
+      "source": {
+        "method": "req.query.dir",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 80
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+        "line": 79
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 80,
+          "column": 16,
+          "code": "req.query.dir",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/admin.js",
+          "line": 79,
+          "column": 0,
+          "code": "router.get('/list-files', (req, res) => {\n    const dir = req.query.dir || '/uploads';\n    const fil",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "3ba63e6d-2f46-4cf5-8196-58c6806c0ca5",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query' flows to dangerous sink 'post()' at line 57. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 12
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 57
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 12,
+          "column": 45,
+          "code": "req.query",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 57,
+          "column": 0,
+          "code": "router.post('/format-price', (req, res) => {\n    const { template, price } = req.body;\n    // Danger",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "45da0e4b-493c-4fb7-8cb5-f106c2c988e0",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query' flows to dangerous sink 'post()' at line 66. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 12
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 66
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 12,
+          "column": 45,
+          "code": "req.query",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 66,
+          "column": 0,
+          "code": "router.post('/:id/reviews', async (req, res) => {\n    const productId = req.params.id;\n    const { c",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "674df13f-2426-484d-bb34-cb0e3b2d33e4",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 38
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 38,
+          "column": 25,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "3dacc045-6f14-4496-b255-4b6a1168ccdd",
+      "vulnerability_type": "CWE-79",
+      "severity": "medium",
+      "description": "Potential Cross-Site Scripting (XSS) vulnerability detected. User input from 'req.body' flows to dangerous sink 'send()' at line 32.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 38
+      },
+      "sink": {
+        "method": "send",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 32
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 38,
+          "column": 25,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 32,
+          "column": 8,
+          "code": "res.status(404).send('Product not found')",
+          "description": "Dangerous sink: send()"
+        }
+      ]
+    },
+    {
+      "id": "6ca7fb0c-605d-492f-b42f-d376df4ce2a4",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 38
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 38,
+          "column": 25,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "7d2722f7-1462-4299-885b-a60b6654b717",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 47
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 47,
+          "column": 36,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "124dc54d-be37-42e4-a6b5-0425556b60f9",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 47
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 47,
+          "column": 36,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "9acc83ed-79e3-414e-8214-62bb442ecfa7",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 58
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 58,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "04302092-f4b0-46e9-85f6-9d8d79006720",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 58
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 58,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "181f0f0a-5fce-4b09-8f49-e1b1c42a848e",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 68
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 68,
+          "column": 32,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "5b458c6e-cd78-4cef-bfea-86476f4ba1ce",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 21. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 78
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 78,
+          "column": 20,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 21,
+          "column": 28,
+          "code": "sequelize.query(`SELECT * FROM products WHERE id = ${productId}`)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "7b876c5c-add5-4429-96f7-520b44ee3150",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 70. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 78
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 70
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 78,
+          "column": 20,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 70,
+          "column": 10,
+          "code": "sequelize.query(\n        `INSERT INTO reviews (product_id, content, rating) VALUES (${productId}, '$",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "3d83f6f8-410d-40ba-8f25-ce60a0efd914",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 81.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 78
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+        "line": 81
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 78,
+          "column": 20,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/products.js",
+          "line": 81,
+          "column": 10,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "1584bd8a-e285-4a13-98ab-22e781c5a69b",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.query.name' flows to dangerous sink 'query()' at line 13.",
+      "source": {
+        "method": "req.query.name",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 11
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 13
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 11,
+          "column": 23,
+          "code": "req.query.name",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 13,
+          "column": 24,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "953e325d-073c-4de2-8ecc-7cfa546e79ba",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.name' flows to dangerous sink 'get()' at line 18. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.name",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 11
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 18
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 11,
+          "column": 23,
+          "code": "req.query.name",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 18,
+          "column": 0,
+          "code": "router.get('/:id', async (req, res) => {\n    const userId = req.params.id;\n    const query = `SELECT",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "79329186-0fd1-4efc-8858-976d0558f476",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.name' flows to dangerous sink 'get()' at line 55. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.name",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 11
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 55
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 11,
+          "column": 23,
+          "code": "req.query.name",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 55,
+          "column": 0,
+          "code": "router.get('/list', async (req, res) => {\n    const sortBy = req.query.sort || 'id';\n    const query",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "6159b42d-ec2e-4b51-909c-ea180618120b",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.name' flows to dangerous sink 'post()' at line 63. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.name",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 11
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 63
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 11,
+          "column": 23,
+          "code": "req.query.name",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 63,
+          "column": 0,
+          "code": "router.post('/:id/profile', async (req, res) => {\n    const userId = req.params.id;\n    const { bio ",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "7696a0b3-cf3a-4734-b6d7-bd6d0055d02e",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 21.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 19
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 21
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 19,
+          "column": 19,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 21,
+          "column": 23,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "64fbb42d-775d-4c0e-ae48-b086b1b81d8c",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 29.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 27
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 29
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 27,
+          "column": 35,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 29,
+          "column": 24,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "6a090858-8ad4-44d8-9598-67b5d85bc436",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 42.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 39
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 39,
+          "column": 19,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 42,
+          "column": 10,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "500f4223-8f31-4514-9b03-8a2464ab8d64",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 42.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 40
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 42
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 40,
+          "column": 22,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 42,
+          "column": 10,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "65f2bc5d-08b5-4cf6-9569-4a79c42bfd3c",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 50.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 48
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 50
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 48,
+          "column": 19,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 50,
+          "column": 10,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "ce7ca4fe-7f73-4216-a247-3d8aec63e684",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.sort' flows to dangerous sink 'get()' at line 10. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.sort",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 10
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 56,
+          "column": 19,
+          "code": "req.query.sort",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 10,
+          "column": 0,
+          "code": "router.get('/search', async (req, res) => {\n    const searchTerm = req.query.name;\n    const query =",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "c0b78ced-bc98-4ea8-82ee-2cf2d583dab3",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.sort' flows to dangerous sink 'get()' at line 18. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.sort",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "get",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 18
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 56,
+          "column": 19,
+          "code": "req.query.sort",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 18,
+          "column": 0,
+          "code": "router.get('/:id', async (req, res) => {\n    const userId = req.params.id;\n    const query = `SELECT",
+          "description": "Dangerous sink: get()"
+        }
+      ]
+    },
+    {
+      "id": "b1bd64fd-99a3-436b-bf53-5191d8806fa2",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.query.sort' flows to dangerous sink 'query()' at line 58.",
+      "source": {
+        "method": "req.query.sort",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 58
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 56,
+          "column": 19,
+          "code": "req.query.sort",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 58,
+          "column": 24,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "15ee56b6-c3d0-4267-bde0-1de6a5182c73",
+      "vulnerability_type": "CWE-918",
+      "severity": "high",
+      "description": "Potential Server-Side Request Forgery (SSRF) vulnerability detected. User input from 'req.query.sort' flows to dangerous sink 'post()' at line 63. HIGH RISK: The sink uses a template literal, indicating direct string interpolation of user input.",
+      "source": {
+        "method": "req.query.sort",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 56
+      },
+      "sink": {
+        "method": "post",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 63
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 56,
+          "column": 19,
+          "code": "req.query.sort",
+          "description": "Tainted data from request_query"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 63,
+          "column": 0,
+          "code": "router.post('/:id/profile', async (req, res) => {\n    const userId = req.params.id;\n    const { bio ",
+          "description": "Dangerous sink: post()"
+        }
+      ]
+    },
+    {
+      "id": "96f7df0f-9cba-48cd-a0a3-58aa7a0d68d0",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.params.id' flows to dangerous sink 'query()' at line 68.",
+      "source": {
+        "method": "req.params.id",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 64
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 68
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 64,
+          "column": 19,
+          "code": "req.params.id",
+          "description": "Tainted data from request_params"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 68,
+          "column": 10,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    },
+    {
+      "id": "be2dd0ce-7c3d-4b02-8607-4feac3600052",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential SQL Injection vulnerability detected. User input from 'req.body' flows to dangerous sink 'query()' at line 68.",
+      "source": {
+        "method": "req.body",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 65
+      },
+      "sink": {
+        "method": "query",
+        "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+        "line": 68
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 65,
+          "column": 20,
+          "code": "req.body",
+          "description": "Tainted data from request_body"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_express_app/backend/routes/users.js",
+          "line": 68,
+          "column": 10,
+          "code": "sequelize.query(query)",
+          "description": "Dangerous sink: query()"
+        }
+      ]
+    }
+  ]
+}

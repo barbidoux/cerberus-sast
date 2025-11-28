@@ -143,6 +143,21 @@ def cli(
     is_flag=True,
     help="Show what would be analyzed without running",
 )
+@click.option(
+    "--hybrid",
+    is_flag=True,
+    help="Use hybrid detection (AST-based taint extraction, no LLM required)",
+)
+@click.option(
+    "--hybrid-ml",
+    is_flag=True,
+    help="Use ML-enhanced hybrid detection (3-tier: patterns → CodeBERT → LLM). Best accuracy.",
+)
+@click.option(
+    "--hybrid-ml-fast",
+    is_flag=True,
+    help="Use ML-enhanced detection without LLM tier (2-tier: patterns → CodeBERT). Fastest ML mode.",
+)
 @click.pass_context
 def scan(
     ctx: click.Context,
@@ -156,6 +171,9 @@ def scan(
     no_verify: bool,
     council: bool,
     dry_run: bool,
+    hybrid: bool,
+    hybrid_ml: bool,
+    hybrid_ml_fast: bool,
 ) -> None:
     """Scan a codebase for security vulnerabilities.
 
@@ -213,6 +231,9 @@ def scan(
             output=output,
             output_format=output_format,
             quiet=ctx.obj.get("quiet", False),
+            hybrid=hybrid,
+            hybrid_ml=hybrid_ml,
+            hybrid_ml_fast=hybrid_ml_fast,
         ))
 
         # Print summary
@@ -497,6 +518,9 @@ async def _run_scan(
     output: Optional[Path],
     output_format: str,
     quiet: bool,
+    hybrid: bool = False,
+    hybrid_ml: bool = False,
+    hybrid_ml_fast: bool = False,
 ) -> Any:
     """Run the scan pipeline with progress tracking."""
     from cerberus.core.orchestrator import OrchestratorResult
@@ -507,6 +531,10 @@ async def _run_scan(
         run_inference=True,
         run_detection=True,
         run_verification=not no_verify and council,
+        use_hybrid_detection=hybrid or hybrid_ml or hybrid_ml_fast,
+        use_hybrid_ml=hybrid_ml or hybrid_ml_fast,  # Milestone 11: ML-enhanced pipeline
+        skip_tier3_llm=hybrid_ml_fast,  # Fast mode: skip LLM tier for speed
+        require_joern_for_hybrid=False,  # Heuristic fallback when Joern unavailable
         max_feedback_iterations=cfg.verification.max_iterations if hasattr(cfg, 'verification') else 3,
         min_confidence=cfg.verification.confidence_threshold if hasattr(cfg, 'verification') else 0.5,
         joern_endpoint=f"http://{cfg.joern.endpoint}" if hasattr(cfg, 'joern') and cfg.joern else "http://localhost:8080",

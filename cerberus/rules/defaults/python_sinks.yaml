@@ -1,0 +1,309 @@
+# Python Sink Rules
+# These patterns identify dangerous operations in Python applications.
+
+sinks:
+  # Command Execution (CWE-78)
+  - name: os_system
+    pattern: "os\\.system\\("
+    callee_pattern: "^system$"
+    type: COMMAND_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-78]
+    description: "os.system - shell command execution"
+    language: python
+
+  - name: os_popen
+    pattern: "os\\.popen\\("
+    callee_pattern: "^popen$"
+    type: COMMAND_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-78]
+    description: "os.popen - shell command execution"
+    language: python
+
+  - name: subprocess_run
+    pattern: "subprocess\\.run\\("
+    callee_pattern: "^run$"
+    type: COMMAND_EXEC
+    confidence: 0.90
+    cwe_types: [CWE-78]
+    description: "subprocess.run - command execution"
+    language: python
+
+  - name: subprocess_call
+    pattern: "subprocess\\.call\\("
+    callee_pattern: "^call$"
+    type: COMMAND_EXEC
+    confidence: 0.90
+    cwe_types: [CWE-78]
+    description: "subprocess.call - command execution"
+    language: python
+
+  - name: subprocess_Popen
+    pattern: "subprocess\\.Popen\\("
+    callee_pattern: "^Popen$"
+    type: COMMAND_EXEC
+    confidence: 0.90
+    cwe_types: [CWE-78]
+    description: "subprocess.Popen - command execution"
+    language: python
+
+  - name: subprocess_check_output
+    pattern: "subprocess\\.check_output\\("
+    callee_pattern: "^check_output$"
+    type: COMMAND_EXEC
+    confidence: 0.90
+    cwe_types: [CWE-78]
+    description: "subprocess.check_output - command execution"
+    language: python
+
+  # Code Execution (CWE-94)
+  - name: eval
+    pattern: "\\beval\\("
+    callee_pattern: "^eval$"
+    type: CODE_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-94]
+    description: "eval - arbitrary code execution"
+    language: python
+
+  - name: exec
+    pattern: "\\bexec\\("
+    callee_pattern: "^exec$"
+    type: CODE_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-94]
+    description: "exec - arbitrary code execution"
+    language: python
+
+  - name: compile
+    pattern: "\\bcompile\\("
+    callee_pattern: "^compile$"
+    type: CODE_EXEC
+    confidence: 0.80
+    cwe_types: [CWE-94]
+    description: "compile - code compilation (when combined with exec)"
+    language: python
+
+  # SQL Injection (CWE-89)
+  - name: cursor_execute
+    pattern: "\\.execute\\("
+    callee_pattern: "^execute$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    high_risk_indicators:
+      fstring: true
+      string_format: true
+    description: "Database cursor execute - SQL injection risk"
+    language: python
+
+  - name: cursor_executemany
+    pattern: "\\.executemany\\("
+    callee_pattern: "^executemany$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "Database cursor executemany"
+    language: python
+
+  - name: sqlalchemy_raw
+    pattern: "\\.execute\\(text\\("
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "SQLAlchemy raw SQL"
+    language: python
+
+  - name: django_raw
+    pattern: "\\.raw\\("
+    callee_pattern: "^raw$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "Django QuerySet.raw - raw SQL"
+    language: python
+
+  - name: django_extra
+    pattern: "\\.extra\\("
+    callee_pattern: "^extra$"
+    type: SQL_QUERY
+    confidence: 0.85
+    cwe_types: [CWE-89]
+    description: "Django QuerySet.extra - SQL injection risk"
+    language: python
+
+  # File System (CWE-22)
+  - name: open_file
+    pattern: "\\bopen\\("
+    callee_pattern: "^open$"
+    type: FILE_READ
+    confidence: 0.85
+    cwe_types: [CWE-22]
+    description: "open() - path traversal if user input in path"
+    language: python
+
+  - name: os_path_join
+    pattern: "os\\.path\\.join\\("
+    callee_pattern: "^join$"
+    type: PATH_ACCESS
+    confidence: 0.80
+    cwe_types: [CWE-22]
+    description: "os.path.join - path traversal risk"
+    language: python
+
+  - name: pathlib_joinpath
+    pattern: "\\.joinpath\\("
+    callee_pattern: "^joinpath$"
+    type: PATH_ACCESS
+    confidence: 0.80
+    cwe_types: [CWE-22]
+    description: "Path.joinpath - path traversal risk"
+    language: python
+
+  - name: shutil_copy
+    pattern: "shutil\\.(copy|copy2|copytree)\\("
+    callee_pattern: "^(copy|copy2|copytree)$"
+    type: FILE_WRITE
+    confidence: 0.85
+    cwe_types: [CWE-22]
+    description: "shutil file operations"
+    language: python
+
+  - name: os_remove
+    pattern: "os\\.(remove|unlink)\\("
+    callee_pattern: "^(remove|unlink)$"
+    type: FILE_WRITE
+    confidence: 0.90
+    cwe_types: [CWE-22]
+    description: "os.remove/unlink - arbitrary file deletion"
+    language: python
+
+  - name: os_mkdir
+    pattern: "os\\.(mkdir|makedirs)\\("
+    callee_pattern: "^(mkdir|makedirs)$"
+    type: FILE_WRITE
+    confidence: 0.85
+    cwe_types: [CWE-22]
+    description: "os.mkdir - directory creation"
+    language: python
+
+  # SSRF (CWE-918)
+  - name: requests_get
+    pattern: "requests\\.(get|post|put|delete|patch)\\("
+    callee_pattern: "^(get|post|put|delete|patch)$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "requests HTTP client - SSRF risk"
+    language: python
+
+  - name: requests_request
+    pattern: "requests\\.request\\("
+    callee_pattern: "^request$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "requests.request - SSRF risk"
+    language: python
+
+  - name: urllib_urlopen
+    pattern: "urllib\\.request\\.urlopen\\("
+    callee_pattern: "^urlopen$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "urllib.urlopen - SSRF risk"
+    language: python
+
+  - name: httpx_get
+    pattern: "httpx\\.(get|post|put|delete|patch)\\("
+    callee_pattern: "^(get|post|put|delete|patch)$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "httpx HTTP client - SSRF risk"
+    language: python
+
+  - name: aiohttp_get
+    pattern: "session\\.(get|post|put|delete|patch)\\("
+    type: URL_FETCH
+    confidence: 0.80
+    cwe_types: [CWE-918]
+    description: "aiohttp HTTP client - SSRF risk"
+    language: python
+
+  # Deserialization (CWE-502)
+  - name: pickle_loads
+    pattern: "pickle\\.(loads|load)\\("
+    callee_pattern: "^(loads|load)$"
+    type: DESERIALIZE
+    confidence: 0.95
+    cwe_types: [CWE-502]
+    description: "pickle deserialization - RCE risk"
+    language: python
+
+  - name: yaml_load
+    pattern: "yaml\\.(load|unsafe_load)\\("
+    callee_pattern: "^(load|unsafe_load)$"
+    type: DESERIALIZE
+    confidence: 0.90
+    cwe_types: [CWE-502]
+    description: "YAML load - deserialization risk"
+    language: python
+
+  - name: marshal_loads
+    pattern: "marshal\\.loads\\("
+    callee_pattern: "^loads$"
+    type: DESERIALIZE
+    confidence: 0.90
+    cwe_types: [CWE-502]
+    description: "marshal.loads - deserialization risk"
+    language: python
+
+  - name: shelve_open
+    pattern: "shelve\\.open\\("
+    callee_pattern: "^open$"
+    type: DESERIALIZE
+    confidence: 0.85
+    cwe_types: [CWE-502]
+    description: "shelve.open - pickle-based storage"
+    language: python
+
+  # Template Injection (CWE-94)
+  - name: jinja2_from_string
+    pattern: "Template\\("
+    callee_pattern: "^Template$"
+    type: TEMPLATE_RENDER
+    confidence: 0.80
+    cwe_types: [CWE-94]
+    description: "Jinja2 Template with user input - SSTI risk"
+    language: python
+
+  - name: render_template_string
+    pattern: "render_template_string\\("
+    callee_pattern: "^render_template_string$"
+    type: TEMPLATE_RENDER
+    confidence: 0.90
+    cwe_types: [CWE-94]
+    description: "Flask render_template_string - SSTI risk"
+    language: python
+
+  # Redirect (CWE-601)
+  - name: flask_redirect
+    pattern: "redirect\\("
+    callee_pattern: "^redirect$"
+    type: REDIRECT
+    confidence: 0.85
+    cwe_types: [CWE-601]
+    description: "Flask redirect - open redirect risk"
+    language: python
+
+  - name: django_redirect
+    pattern: "HttpResponseRedirect\\("
+    callee_pattern: "^HttpResponseRedirect$"
+    type: REDIRECT
+    confidence: 0.85
+    cwe_types: [CWE-601]
+    description: "Django HttpResponseRedirect - open redirect risk"
+    language: python

@@ -118,6 +118,7 @@ Classification:
 # =============================================================================
 
 SOURCE_EXAMPLES: list[FewShotExample] = [
+    # Python examples
     FewShotExample(
         code="""def get_user_input(request):
     user_id = request.args.get('id')
@@ -125,25 +126,6 @@ SOURCE_EXAMPLES: list[FewShotExample] = [
         language="python",
         label=TaintLabel.SOURCE,
         reason="This function reads user-controlled data from HTTP request parameters. The 'id' parameter comes from untrusted user input and could contain malicious values.",
-        vulnerability_types=["CWE-89", "CWE-79"],
-    ),
-    FewShotExample(
-        code="""public String getParameter(HttpServletRequest request) {
-    return request.getParameter("username");
-}""",
-        language="java",
-        label=TaintLabel.SOURCE,
-        reason="Retrieves user-supplied data from HTTP request. The username parameter is user-controlled and should be treated as tainted.",
-        vulnerability_types=["CWE-89", "CWE-79", "CWE-78"],
-    ),
-    FewShotExample(
-        code="""function getUserData(req) {
-    const { name, email } = req.body;
-    return { name, email };
-}""",
-        language="javascript",
-        label=TaintLabel.SOURCE,
-        reason="Extracts data from HTTP request body. Request body content is user-controlled and represents untrusted input.",
         vulnerability_types=["CWE-89", "CWE-79"],
     ),
     FewShotExample(
@@ -163,6 +145,72 @@ SOURCE_EXAMPLES: list[FewShotExample] = [
         reason="Reads from environment variables. Environment variables can be controlled in certain contexts and should be validated.",
         vulnerability_types=["CWE-78"],
     ),
+    # Java example
+    FewShotExample(
+        code="""public String getParameter(HttpServletRequest request) {
+    return request.getParameter("username");
+}""",
+        language="java",
+        label=TaintLabel.SOURCE,
+        reason="Retrieves user-supplied data from HTTP request. The username parameter is user-controlled and should be treated as tainted.",
+        vulnerability_types=["CWE-89", "CWE-79", "CWE-78"],
+    ),
+    # JavaScript/Express.js examples
+    FewShotExample(
+        code="""function getUserData(req) {
+    const { name, email } = req.body;
+    return { name, email };
+}""",
+        language="javascript",
+        label=TaintLabel.SOURCE,
+        reason="Extracts data from HTTP request body. Request body content is user-controlled and represents untrusted input.",
+        vulnerability_types=["CWE-89", "CWE-79"],
+    ),
+    FewShotExample(
+        code="""router.get('/users/:id', (req, res) => {
+    const userId = req.params.id;
+    const query = req.query.filter;
+    return { userId, query };
+});""",
+        language="javascript",
+        label=TaintLabel.SOURCE,
+        reason="Express.js route handler reading from URL params (req.params.id) and query string (req.query.filter). Both are user-controlled and should be validated.",
+        vulnerability_types=["CWE-89", "CWE-22", "CWE-78"],
+    ),
+    FewShotExample(
+        code="""const handler = async (req, res) => {
+    const { username, password } = req.body;
+    const token = req.headers.authorization;
+    const sessionId = req.cookies.session;
+    // Process login...
+};""",
+        language="javascript",
+        label=TaintLabel.SOURCE,
+        reason="Express handler accessing multiple user-controlled inputs: request body, headers, and cookies. All these are untrusted sources.",
+        vulnerability_types=["CWE-89", "CWE-79", "CWE-798"],
+    ),
+    # TypeScript/Angular examples
+    FewShotExample(
+        code="""constructor(private route: ActivatedRoute) {
+    this.route.params.subscribe(params => {
+        this.userId = params['id'];
+    });
+}""",
+        language="typescript",
+        label=TaintLabel.SOURCE,
+        reason="Angular component reading route parameters via ActivatedRoute. URL parameters are user-controlled and can contain malicious values.",
+        vulnerability_types=["CWE-79", "CWE-22"],
+    ),
+    FewShotExample(
+        code="""async fetchUserProfile(userId: string): Promise<User> {
+    const response = await this.http.get<User>(`/api/users/${userId}`);
+    return response;
+}""",
+        language="typescript",
+        label=TaintLabel.SOURCE,
+        reason="HTTP client fetching external data. Responses from external APIs should be treated as potentially untrusted sources.",
+        vulnerability_types=["CWE-79", "CWE-918"],
+    ),
 ]
 
 # =============================================================================
@@ -170,6 +218,7 @@ SOURCE_EXAMPLES: list[FewShotExample] = [
 # =============================================================================
 
 SINK_EXAMPLES: list[FewShotExample] = [
+    # Python examples
     FewShotExample(
         code="""def execute_query(cursor, query):
     cursor.execute(query)
@@ -180,6 +229,24 @@ SINK_EXAMPLES: list[FewShotExample] = [
         vulnerability_types=["CWE-89"],
     ),
     FewShotExample(
+        code="""def read_file(path):
+    with open(path, 'r') as f:
+        return f.read()""",
+        language="python",
+        label=TaintLabel.SINK,
+        reason="Opens a file using a path parameter. If path is user-controlled, attackers can read arbitrary files (path traversal).",
+        vulnerability_types=["CWE-22"],
+    ),
+    FewShotExample(
+        code="""def run_subprocess(command):
+    subprocess.run(command, shell=True)""",
+        language="python",
+        label=TaintLabel.SINK,
+        reason="Runs command with shell=True. Shell interpretation of user input enables command injection.",
+        vulnerability_types=["CWE-78"],
+    ),
+    # Java example
+    FewShotExample(
         code="""public void runCommand(String cmd) {
     Runtime.getRuntime().exec(cmd);
 }""",
@@ -188,6 +255,7 @@ SINK_EXAMPLES: list[FewShotExample] = [
         reason="Executes a system command. If cmd contains user input, attackers can execute arbitrary commands.",
         vulnerability_types=["CWE-78"],
     ),
+    # JavaScript/Node.js sinks
     FewShotExample(
         code="""function renderHtml(content) {
     document.getElementById('output').innerHTML = content;
@@ -196,15 +264,6 @@ SINK_EXAMPLES: list[FewShotExample] = [
         label=TaintLabel.SINK,
         reason="Sets innerHTML with potentially untrusted content. This enables cross-site scripting (XSS) attacks.",
         vulnerability_types=["CWE-79"],
-    ),
-    FewShotExample(
-        code="""def read_file(path):
-    with open(path, 'r') as f:
-        return f.read()""",
-        language="python",
-        label=TaintLabel.SINK,
-        reason="Opens a file using a path parameter. If path is user-controlled, attackers can read arbitrary files (path traversal).",
-        vulnerability_types=["CWE-22"],
     ),
     FewShotExample(
         code="""async function fetchUrl(url) {
@@ -217,12 +276,77 @@ SINK_EXAMPLES: list[FewShotExample] = [
         vulnerability_types=["CWE-918"],
     ),
     FewShotExample(
-        code="""def run_subprocess(command):
-    subprocess.run(command, shell=True)""",
-        language="python",
+        code="""const { exec } = require('child_process');
+router.post('/backup', (req, res) => {
+    const { filename } = req.body;
+    exec(`tar -czf /backups/${filename}.tar.gz /data`);
+});""",
+        language="javascript",
         label=TaintLabel.SINK,
-        reason="Runs command with shell=True. Shell interpretation of user input enables command injection.",
+        reason="Command injection via child_process.exec(). User input (filename) is interpolated directly into shell command without sanitization.",
         vulnerability_types=["CWE-78"],
+    ),
+    FewShotExample(
+        code="""User.findByUsername = async function(username) {
+    const query = `SELECT * FROM Users WHERE username = '${username}'`;
+    const [users] = await sequelize.query(query);
+    return users[0];
+};""",
+        language="javascript",
+        label=TaintLabel.SINK,
+        reason="SQL injection via Sequelize raw query. User input is directly interpolated into SQL string instead of using parameterized queries.",
+        vulnerability_types=["CWE-89"],
+    ),
+    FewShotExample(
+        code="""router.get('/logs', (req, res) => {
+    const filename = req.query.file;
+    const logPath = path.join('/var/log', filename);
+    const content = fs.readFileSync(logPath, 'utf8');
+    res.send(content);
+});""",
+        language="javascript",
+        label=TaintLabel.SINK,
+        reason="Path traversal via fs.readFileSync(). path.join does not prevent '../' sequences, allowing attackers to read arbitrary files.",
+        vulnerability_types=["CWE-22"],
+    ),
+    FewShotExample(
+        code="""function executeCode(code) {
+    return eval(code);
+}""",
+        language="javascript",
+        label=TaintLabel.SINK,
+        reason="Code injection via eval(). Executing user-controlled code allows arbitrary code execution.",
+        vulnerability_types=["CWE-94"],
+    ),
+    # TypeScript/Angular sinks
+    FewShotExample(
+        code="""displayResults(results: string): void {
+    this.resultsHtml = this.sanitizer.bypassSecurityTrustHtml(results);
+}""",
+        language="typescript",
+        label=TaintLabel.SINK,
+        reason="Angular XSS via bypassSecurityTrustHtml. This explicitly bypasses Angular's built-in XSS protection, allowing script injection.",
+        vulnerability_types=["CWE-79"],
+    ),
+    FewShotExample(
+        code="""@ViewChild('container') container: ElementRef;
+
+render(html: string): void {
+    this.container.nativeElement.innerHTML = html;
+}""",
+        language="typescript",
+        label=TaintLabel.SINK,
+        reason="Angular XSS via direct DOM manipulation. Setting innerHTML on nativeElement bypasses Angular's sanitization.",
+        vulnerability_types=["CWE-79"],
+    ),
+    FewShotExample(
+        code="""async proxyRequest(targetUrl: string): Observable<any> {
+    return this.http.get(targetUrl);
+}""",
+        language="typescript",
+        label=TaintLabel.SINK,
+        reason="SSRF vulnerability. Making HTTP requests to user-controlled URLs allows attackers to access internal services.",
+        vulnerability_types=["CWE-918"],
     ),
 ]
 
@@ -231,6 +355,7 @@ SINK_EXAMPLES: list[FewShotExample] = [
 # =============================================================================
 
 SANITIZER_EXAMPLES: list[FewShotExample] = [
+    # Python examples
     FewShotExample(
         code="""def escape_html(text):
     return html.escape(text)""",
@@ -240,6 +365,18 @@ SANITIZER_EXAMPLES: list[FewShotExample] = [
         vulnerability_types=["CWE-79"],
     ),
     FewShotExample(
+        code="""def normalize_path(path):
+    abs_path = os.path.abspath(path)
+    if not abs_path.startswith(ALLOWED_DIR):
+        raise ValueError("Path traversal detected")
+    return abs_path""",
+        language="python",
+        label=TaintLabel.SANITIZER,
+        reason="Validates file path against allowed directory. Prevents path traversal by rejecting paths outside allowed scope.",
+        vulnerability_types=["CWE-22"],
+    ),
+    # Java example
+    FewShotExample(
         code="""public String sanitizeSql(String input) {
     return input.replaceAll("['\";]", "");
 }""",
@@ -248,6 +385,7 @@ SANITIZER_EXAMPLES: list[FewShotExample] = [
         reason="Removes SQL metacharacters from input. This helps prevent SQL injection, though parameterized queries are preferred.",
         vulnerability_types=["CWE-89"],
     ),
+    # JavaScript/Node.js sanitizers
     FewShotExample(
         code=r"""function validateEmail(email) {
     const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -262,14 +400,74 @@ SANITIZER_EXAMPLES: list[FewShotExample] = [
         vulnerability_types=["CWE-89", "CWE-79"],
     ),
     FewShotExample(
-        code="""def normalize_path(path):
-    abs_path = os.path.abspath(path)
-    if not abs_path.startswith(ALLOWED_DIR):
-        raise ValueError("Path traversal detected")
-    return abs_path""",
-        language="python",
+        code="""const DOMPurify = require('dompurify');
+
+function sanitizeHtml(dirtyHtml) {
+    return DOMPurify.sanitize(dirtyHtml);
+}""",
+        language="javascript",
         label=TaintLabel.SANITIZER,
-        reason="Validates file path against allowed directory. Prevents path traversal by rejecting paths outside allowed scope.",
+        reason="DOMPurify sanitizes HTML by removing dangerous elements and attributes. This prevents XSS while preserving safe HTML.",
+        vulnerability_types=["CWE-79"],
+    ),
+    FewShotExample(
+        code="""const { escape } = require('validator');
+
+function escapeUserInput(input) {
+    return escape(input);
+}""",
+        language="javascript",
+        label=TaintLabel.SANITIZER,
+        reason="Uses validator library's escape function to encode HTML entities. Prevents XSS by neutralizing special characters.",
+        vulnerability_types=["CWE-79"],
+    ),
+    FewShotExample(
+        code="""const { body, validationResult } = require('express-validator');
+
+const validateUser = [
+    body('username').isAlphanumeric().trim().escape(),
+    body('email').isEmail().normalizeEmail(),
+];""",
+        language="javascript",
+        label=TaintLabel.SANITIZER,
+        reason="Express-validator middleware that validates and sanitizes input. Combines validation (isAlphanumeric, isEmail) with sanitization (trim, escape, normalizeEmail).",
+        vulnerability_types=["CWE-89", "CWE-79"],
+    ),
+    FewShotExample(
+        code="""function validateId(id) {
+    const numId = parseInt(id, 10);
+    if (isNaN(numId) || numId < 0) {
+        throw new Error('Invalid ID');
+    }
+    return numId;
+}""",
+        language="javascript",
+        label=TaintLabel.SANITIZER,
+        reason="Validates and converts input to integer. Prevents SQL injection by ensuring only numeric values are used.",
+        vulnerability_types=["CWE-89"],
+    ),
+    # TypeScript/Angular sanitizers
+    FewShotExample(
+        code="""sanitizeSearchTerm(term: string): string {
+    return term.replace(/[<>\"'&]/g, '');
+}""",
+        language="typescript",
+        label=TaintLabel.SANITIZER,
+        reason="Removes dangerous characters that could enable XSS. While basic, this prevents common injection patterns.",
+        vulnerability_types=["CWE-79"],
+    ),
+    FewShotExample(
+        code="""validatePath(userPath: string): string {
+    const normalized = path.normalize(userPath);
+    const resolved = path.resolve(this.uploadDir, normalized);
+    if (!resolved.startsWith(this.uploadDir)) {
+        throw new Error('Path traversal detected');
+    }
+    return resolved;
+}""",
+        language="typescript",
+        label=TaintLabel.SANITIZER,
+        reason="Path traversal protection using path normalization and prefix checking. Ensures files stay within allowed directory.",
         vulnerability_types=["CWE-22"],
     ),
 ]

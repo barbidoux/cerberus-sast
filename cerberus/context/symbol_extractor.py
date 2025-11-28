@@ -347,6 +347,12 @@ class SymbolExtractor:
             return self._extract_js_class(node, file_path, source)
         elif node.type == "method_definition":
             return self._extract_js_method(node, file_path, source, parent_class)
+        elif node.type in ("lexical_declaration", "variable_declaration"):
+            # Handle: const/let/var handler = (req, res) => { ... }
+            return self._extract_js_arrow_function(node, file_path, source)
+        elif node.type == "expression_statement":
+            # Handle: module.exports.handler = ... or exports.handler = ...
+            return self._extract_js_exports_assignment(node, file_path, source)
         return None
 
     def _extract_ts_symbol(
@@ -360,6 +366,23 @@ class SymbolExtractor:
         # TypeScript adds interface declarations
         if node.type == "interface_declaration":
             return self._extract_ts_interface(node, file_path, source)
+
+        # Handle export statements (export class Foo {})
+        if node.type == "export_statement":
+            for child in node.children:
+                if child.type == "class_declaration":
+                    return self._extract_js_class(child, file_path, source)
+                elif child.type == "function_declaration":
+                    return self._extract_js_function(child, file_path, source)
+                elif child.type == "lexical_declaration":
+                    return self._extract_js_arrow_function(child, file_path, source)
+                # Handle decorated classes in export: export @Component class Foo
+                elif child.type == "class":
+                    return self._extract_ts_decorated_class(child, file_path, source)
+
+        # Handle decorated class declarations (@Component class Foo {})
+        if node.type == "class":
+            return self._extract_ts_decorated_class(node, file_path, source)
 
         # Fall back to JavaScript extraction
         return self._extract_js_symbol(node, file_path, source, parent_class)
@@ -397,11 +420,12 @@ class SymbolExtractor:
         file_path: Path,
         source: bytes,
     ) -> Optional[Symbol]:
-        """Extract JavaScript class declaration."""
+        """Extract JavaScript/TypeScript class declaration."""
         name = None
 
         for child in node.children:
-            if child.type == "identifier":
+            # JavaScript uses 'identifier', TypeScript uses 'type_identifier'
+            if child.type in ("identifier", "type_identifier"):
                 name = self._get_node_text(child, source)
                 break
 
@@ -444,6 +468,107 @@ class SymbolExtractor:
             parent_class=parent_class,
         )
 
+    def _extract_js_arrow_function(
+        self,
+        node: Any,
+        file_path: Path,
+        source: bytes,
+    ) -> Optional[Symbol]:
+        """
+        Extract arrow function from variable declaration.
+
+        Handles patterns like:
+        - const handler = (req, res) => { ... }
+        - let processor = async (data) => { ... }
+        - var compute = x => x * 2
+        """
+        # Look for variable_declarator children
+        for child in node.children:
+            if child.type == "variable_declarator":
+                name = None
+                signature = None
+                is_arrow_function = False
+
+                for var_child in child.children:
+                    if var_child.type == "identifier":
+                        name = self._get_node_text(var_child, source)
+                    elif var_child.type == "arrow_function":
+                        is_arrow_function = True
+                        # Extract signature from arrow function
+                        for arrow_child in var_child.children:
+                            if arrow_child.type == "formal_parameters":
+                                signature = self._get_node_text(arrow_child, source)
+                            elif arrow_child.type == "identifier":
+                                # Single param without parens: x => x * 2
+                                signature = f"({self._get_node_text(arrow_child, source)})"
+
+                if name and is_arrow_function:
+                    return Symbol(
+                        name=name,
+                        type=SymbolType.FUNCTION,
+                        file_path=file_path,
+                        line=node.start_point[0] + 1,
+                        signature=signature,
+                    )
+
+        return None
+
+    def _extract_js_exports_assignment(
+        self,
+        node: Any,
+        file_path: Path,
+        source: bytes,
+    ) -> Optional[Symbol]:
+        """
+        Extract function from module.exports or exports assignment.
+
+        Handles patterns like:
+        - module.exports.handler = (event) => { ... }
+        - exports.processRequest = async (req, res) => { ... }
+        """
+        for child in node.children:
+            if child.type == "assignment_expression":
+                name = None
+                signature = None
+                is_function = False
+
+                for assign_child in child.children:
+                    # Left side: member_expression like module.exports.handler
+                    if assign_child.type == "member_expression":
+                        # Get the last property (the function name)
+                        for mem_child in assign_child.children:
+                            if mem_child.type == "property_identifier":
+                                potential_name = self._get_node_text(mem_child, source)
+                                # Skip 'exports' itself
+                                if potential_name not in ("exports", "module"):
+                                    name = potential_name
+
+                    # Right side: arrow_function or function_expression
+                    elif assign_child.type == "arrow_function":
+                        is_function = True
+                        for arrow_child in assign_child.children:
+                            if arrow_child.type == "formal_parameters":
+                                signature = self._get_node_text(arrow_child, source)
+                            elif arrow_child.type == "identifier":
+                                signature = f"({self._get_node_text(arrow_child, source)})"
+
+                    elif assign_child.type == "function_expression":
+                        is_function = True
+                        for func_child in assign_child.children:
+                            if func_child.type == "formal_parameters":
+                                signature = self._get_node_text(func_child, source)
+
+                if name and is_function:
+                    return Symbol(
+                        name=name,
+                        type=SymbolType.FUNCTION,
+                        file_path=file_path,
+                        line=node.start_point[0] + 1,
+                        signature=signature,
+                    )
+
+        return None
+
     def _extract_ts_interface(
         self,
         node: Any,
@@ -464,6 +589,41 @@ class SymbolExtractor:
         return Symbol(
             name=name,
             type=SymbolType.INTERFACE,
+            file_path=file_path,
+            line=node.start_point[0] + 1,
+        )
+
+    def _extract_ts_decorated_class(
+        self,
+        node: Any,
+        file_path: Path,
+        source: bytes,
+    ) -> Optional[Symbol]:
+        """
+        Extract TypeScript decorated class.
+
+        Handles patterns like:
+        - @Component({}) class Foo {}
+        - @Injectable() export class Bar {}
+        """
+        name = None
+
+        # Look for type_identifier (class name in TS)
+        for child in node.children:
+            if child.type == "type_identifier":
+                name = self._get_node_text(child, source)
+                break
+            # Some parsers use identifier instead
+            elif child.type == "identifier":
+                name = self._get_node_text(child, source)
+                break
+
+        if not name:
+            return None
+
+        return Symbol(
+            name=name,
+            type=SymbolType.CLASS,
             file_path=file_path,
             line=node.start_point[0] + 1,
         )

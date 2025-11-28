@@ -1,0 +1,215 @@
+# Sanitizer Rules
+# These patterns identify functions that sanitize/validate user input,
+# making tainted data safe for use in sinks.
+
+sanitizers:
+  # JavaScript Sanitizers
+  - name: dompurify
+    pattern: "DOMPurify\\.sanitize\\("
+    type: XSS_SANITIZER
+    confidence: 0.95
+    cwe_types: [CWE-79]
+    description: "DOMPurify - XSS sanitizer"
+    language: javascript
+
+  - name: escape_html
+    pattern: "escapeHtml\\(|escape\\("
+    type: XSS_SANITIZER
+    confidence: 0.85
+    cwe_types: [CWE-79]
+    description: "HTML escape function"
+    language: javascript
+
+  - name: validator_escape
+    pattern: "validator\\.escape\\("
+    type: XSS_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-79]
+    description: "validator.js escape"
+    language: javascript
+
+  - name: express_validator
+    pattern: "body\\([^)]*\\)\\.(sanitize|escape|trim|normalizeEmail)"
+    type: INPUT_VALIDATOR
+    confidence: 0.85
+    cwe_types: [CWE-89, CWE-78, CWE-79]
+    description: "express-validator sanitization"
+    language: javascript
+
+  - name: joi_validate
+    pattern: "Joi\\.(string|number|boolean)\\("
+    type: INPUT_VALIDATOR
+    confidence: 0.80
+    cwe_types: [CWE-89, CWE-78]
+    description: "Joi schema validation"
+    language: javascript
+
+  - name: sequelize_escape
+    pattern: "sequelize\\.escape\\("
+    type: SQL_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "Sequelize escape function"
+    language: javascript
+
+  - name: parameterized_query
+    pattern: "\\?|\\$\\d+"
+    type: SQL_SANITIZER
+    confidence: 0.95
+    cwe_types: [CWE-89]
+    description: "Parameterized SQL query"
+    language: javascript
+
+  - name: path_normalize
+    pattern: "path\\.normalize\\("
+    type: PATH_SANITIZER
+    confidence: 0.70
+    cwe_types: [CWE-22]
+    description: "path.normalize - partial path traversal protection"
+    language: javascript
+
+  - name: path_basename
+    pattern: "path\\.basename\\("
+    type: PATH_SANITIZER
+    confidence: 0.85
+    cwe_types: [CWE-22]
+    description: "path.basename - extracts filename only"
+    language: javascript
+
+  # Python Sanitizers
+  - name: bleach_clean
+    pattern: "bleach\\.clean\\("
+    type: XSS_SANITIZER
+    confidence: 0.95
+    cwe_types: [CWE-79]
+    description: "Bleach HTML sanitizer"
+    language: python
+
+  - name: markupsafe_escape
+    pattern: "(markupsafe\\.)?escape\\("
+    type: XSS_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-79]
+    description: "MarkupSafe/Jinja2 escape"
+    language: python
+
+  - name: html_escape
+    pattern: "html\\.escape\\("
+    type: XSS_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-79]
+    description: "html.escape"
+    language: python
+
+  - name: quote_sql
+    pattern: "\\%s|\\?|\\:\\w+"
+    type: SQL_SANITIZER
+    confidence: 0.95
+    cwe_types: [CWE-89]
+    description: "Parameterized SQL query"
+    language: python
+
+  - name: shlex_quote
+    pattern: "shlex\\.quote\\("
+    type: COMMAND_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-78]
+    description: "shlex.quote - shell escaping"
+    language: python
+
+  - name: os_path_basename
+    pattern: "os\\.path\\.basename\\("
+    type: PATH_SANITIZER
+    confidence: 0.85
+    cwe_types: [CWE-22]
+    description: "os.path.basename - extracts filename only"
+    language: python
+
+  - name: secure_filename
+    pattern: "secure_filename\\("
+    type: PATH_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-22]
+    description: "Werkzeug secure_filename"
+    language: python
+
+  - name: int_cast
+    pattern: "int\\("
+    type: TYPE_SANITIZER
+    confidence: 0.85
+    cwe_types: [CWE-89, CWE-78]
+    description: "Integer cast - ensures numeric input"
+    language: python
+
+  - name: uuid_validator
+    pattern: "UUID\\("
+    type: TYPE_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "UUID validation"
+    language: python
+
+  - name: django_escape
+    pattern: "django\\.utils\\.html\\.escape\\("
+    type: XSS_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-79]
+    description: "Django HTML escape"
+    language: python
+
+  # PHP Sanitizers
+  - name: htmlspecialchars
+    pattern: "htmlspecialchars\\("
+    type: XSS_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-79]
+    description: "PHP htmlspecialchars"
+    language: php
+
+  - name: htmlentities
+    pattern: "htmlentities\\("
+    type: XSS_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-79]
+    description: "PHP htmlentities"
+    language: php
+
+  - name: mysqli_real_escape
+    pattern: "mysqli_real_escape_string\\("
+    type: SQL_SANITIZER
+    confidence: 0.85
+    cwe_types: [CWE-89]
+    description: "MySQLi escape (prefer parameterized queries)"
+    language: php
+
+  - name: pdo_prepare
+    pattern: "prepare\\("
+    type: SQL_SANITIZER
+    confidence: 0.95
+    cwe_types: [CWE-89]
+    description: "PDO prepared statement"
+    language: php
+
+  - name: escapeshellarg
+    pattern: "escapeshellarg\\("
+    type: COMMAND_SANITIZER
+    confidence: 0.90
+    cwe_types: [CWE-78]
+    description: "PHP escapeshellarg"
+    language: php
+
+  - name: escapeshellcmd
+    pattern: "escapeshellcmd\\("
+    type: COMMAND_SANITIZER
+    confidence: 0.85
+    cwe_types: [CWE-78]
+    description: "PHP escapeshellcmd (weaker than escapeshellarg)"
+    language: php
+
+  - name: basename_php
+    pattern: "basename\\("
+    type: PATH_SANITIZER
+    confidence: 0.85
+    cwe_types: [CWE-22]
+    description: "PHP basename"
+    language: php

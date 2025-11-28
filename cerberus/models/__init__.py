@@ -29,6 +29,16 @@ from cerberus.models.finding import (
     Finding,
     ScanResult,
 )
+from cerberus.models.taint_flow import (
+    SourceType,
+    SinkType,
+    TaintSource,
+    TaintSink,
+    FlowTraceStep,
+    TaintFlowCandidate,
+    LANGUAGE_SOURCE_PATTERNS,
+    LANGUAGE_SINK_PATTERNS,
+)
 
 __all__ = [
     # Base types
@@ -56,4 +66,13 @@ __all__ = [
     "VerificationResult",
     "Finding",
     "ScanResult",
+    # Taint Flow (Milestone 7 - AST-level analysis)
+    "SourceType",
+    "SinkType",
+    "TaintSource",
+    "TaintSink",
+    "FlowTraceStep",
+    "TaintFlowCandidate",
+    "LANGUAGE_SOURCE_PATTERNS",
+    "LANGUAGE_SINK_PATTERNS",
 ]

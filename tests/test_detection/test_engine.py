@@ -223,15 +223,17 @@ class TestDetectionPipeline:
 
     @pytest.mark.asyncio
     async def test_handles_joern_unavailable(self, sample_spec: DynamicSpec):
-        """Should handle Joern being unavailable."""
+        """Should handle Joern being unavailable with LLM-trust fallback."""
         mock_joern = AsyncMock(spec=JoernClient)
         mock_joern.is_available.return_value = False
 
         engine = DetectionEngine(joern_client=mock_joern)
         result = await engine.detect(sample_spec)
 
-        assert result.success is False
-        assert "unavailable" in result.error.lower() or "connection" in result.error.lower()
+        # Detection should succeed using LLM-trust fallback
+        assert result.success is True
+        assert result.metadata.get("detection_mode") == "llm_trust"
+        assert result.metadata.get("joern_available") is False
 
 
 class TestFindingCreation:

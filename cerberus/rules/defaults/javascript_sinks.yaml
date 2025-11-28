@@ -1,0 +1,359 @@
+# JavaScript/Node.js Sink Rules
+# These patterns identify dangerous operations that could be exploited with untrusted input.
+
+sinks:
+  # Command Execution (CWE-78)
+  - name: child_process_exec
+    pattern: "exec\\("
+    callee_pattern: "^(exec|execSync)$"
+    type: COMMAND_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-78]
+    high_risk_indicators:
+      template_literal: true
+      string_concat: true
+    description: "child_process.exec - OS command execution"
+    language: javascript
+
+  - name: child_process_execSync
+    pattern: "execSync\\("
+    callee_pattern: "^execSync$"
+    type: COMMAND_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-78]
+    description: "child_process.execSync - synchronous command execution"
+    language: javascript
+
+  - name: child_process_spawn
+    pattern: "spawn\\("
+    callee_pattern: "^(spawn|spawnSync)$"
+    type: COMMAND_EXEC
+    confidence: 0.90
+    cwe_types: [CWE-78]
+    description: "child_process.spawn - process spawning"
+    language: javascript
+
+  - name: shell_exec_vm
+    pattern: "runInNewContext|runInContext|runInThisContext"
+    callee_pattern: "^runIn(New|This)?Context$"
+    type: CODE_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-94]
+    description: "Node.js vm module execution"
+    language: javascript
+
+  # SQL Injection (CWE-89)
+  - name: sequelize_query
+    pattern: "\\.query\\("
+    callee_pattern: "^query$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    high_risk_indicators:
+      template_literal: true
+      string_concat: true
+    description: "Sequelize raw SQL query"
+    language: javascript
+
+  - name: mysql_query
+    pattern: "\\.query\\("
+    callee_pattern: "^query$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "MySQL driver query"
+    language: javascript
+
+  - name: pg_query
+    pattern: "\\.query\\("
+    callee_pattern: "^query$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "PostgreSQL driver query"
+    language: javascript
+
+  - name: sql_execute
+    pattern: "\\.execute\\("
+    callee_pattern: "^execute$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "SQL execute statement"
+    language: javascript
+
+  - name: sql_raw
+    pattern: "\\.raw\\("
+    callee_pattern: "^raw$"
+    type: SQL_QUERY
+    confidence: 0.90
+    cwe_types: [CWE-89]
+    description: "Raw SQL query (Knex, TypeORM)"
+    language: javascript
+
+  # Code Execution (CWE-94)
+  - name: eval
+    pattern: "\\beval\\("
+    callee_pattern: "^eval$"
+    type: CODE_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-94]
+    description: "JavaScript eval - code execution"
+    language: javascript
+
+  - name: function_constructor
+    pattern: "new Function\\("
+    callee_pattern: "^Function$"
+    type: CODE_EXEC
+    confidence: 0.95
+    cwe_types: [CWE-94]
+    description: "Function constructor - dynamic code creation"
+    language: javascript
+
+  - name: setTimeout_string
+    pattern: "setTimeout\\("
+    callee_pattern: "^setTimeout$"
+    type: CODE_EXEC
+    confidence: 0.75
+    cwe_types: [CWE-94]
+    description: "setTimeout with string argument - code execution"
+    language: javascript
+
+  - name: setInterval_string
+    pattern: "setInterval\\("
+    callee_pattern: "^setInterval$"
+    type: CODE_EXEC
+    confidence: 0.75
+    cwe_types: [CWE-94]
+    description: "setInterval with string argument - code execution"
+    language: javascript
+
+  # XSS - DOM Write (CWE-79)
+  - name: innerHTML
+    pattern: "\\.innerHTML\\s*="
+    callee_pattern: "^innerHTML$"
+    type: DOM_WRITE
+    confidence: 0.95
+    cwe_types: [CWE-79]
+    description: "innerHTML assignment - DOM XSS"
+    language: javascript
+
+  - name: outerHTML
+    pattern: "\\.outerHTML\\s*="
+    callee_pattern: "^outerHTML$"
+    type: DOM_WRITE
+    confidence: 0.95
+    cwe_types: [CWE-79]
+    description: "outerHTML assignment - DOM XSS"
+    language: javascript
+
+  - name: document_write
+    pattern: "document\\.write\\("
+    callee_pattern: "^write$"
+    type: DOM_WRITE
+    confidence: 0.95
+    cwe_types: [CWE-79]
+    description: "document.write - DOM XSS"
+    language: javascript
+
+  - name: document_writeln
+    pattern: "document\\.writeln\\("
+    callee_pattern: "^writeln$"
+    type: DOM_WRITE
+    confidence: 0.95
+    cwe_types: [CWE-79]
+    description: "document.writeln - DOM XSS"
+    language: javascript
+
+  - name: insertAdjacentHTML
+    pattern: "\\.insertAdjacentHTML\\("
+    callee_pattern: "^insertAdjacentHTML$"
+    type: DOM_WRITE
+    confidence: 0.90
+    cwe_types: [CWE-79]
+    description: "insertAdjacentHTML - DOM XSS"
+    language: javascript
+
+  # Response Write (CWE-79)
+  - name: res_send
+    pattern: "\\.send\\("
+    callee_pattern: "^send$"
+    type: RESPONSE_WRITE
+    confidence: 0.75
+    cwe_types: [CWE-79]
+    description: "Express res.send - reflected XSS if user data included"
+    language: javascript
+
+  - name: res_json
+    pattern: "\\.json\\("
+    callee_pattern: "^json$"
+    type: RESPONSE_WRITE
+    confidence: 0.60
+    cwe_types: [CWE-79]
+    description: "Express res.json - usually safe but check for HTML in values"
+    language: javascript
+
+  # File System (CWE-22)
+  - name: fs_readFile
+    pattern: "readFile(Sync)?\\("
+    callee_pattern: "^readFile(Sync)?$"
+    type: FILE_READ
+    confidence: 0.90
+    cwe_types: [CWE-22]
+    description: "fs.readFile - path traversal risk"
+    language: javascript
+
+  - name: fs_writeFile
+    pattern: "writeFile(Sync)?\\("
+    callee_pattern: "^writeFile(Sync)?$"
+    type: FILE_WRITE
+    confidence: 0.90
+    cwe_types: [CWE-22]
+    description: "fs.writeFile - path traversal risk"
+    language: javascript
+
+  - name: fs_unlink
+    pattern: "unlink(Sync)?\\("
+    callee_pattern: "^unlink(Sync)?$"
+    type: FILE_WRITE
+    confidence: 0.90
+    cwe_types: [CWE-22]
+    description: "fs.unlink - arbitrary file deletion"
+    language: javascript
+
+  - name: fs_mkdir
+    pattern: "mkdir(Sync)?\\("
+    callee_pattern: "^mkdir(Sync)?$"
+    type: FILE_WRITE
+    confidence: 0.85
+    cwe_types: [CWE-22]
+    description: "fs.mkdir - directory creation"
+    language: javascript
+
+  - name: path_join
+    pattern: "path\\.join\\("
+    callee_pattern: "^join$"
+    type: PATH_ACCESS
+    confidence: 0.80
+    cwe_types: [CWE-22]
+    description: "path.join with user input - path traversal"
+    language: javascript
+
+  - name: path_resolve
+    pattern: "path\\.resolve\\("
+    callee_pattern: "^resolve$"
+    type: PATH_ACCESS
+    confidence: 0.80
+    cwe_types: [CWE-22]
+    description: "path.resolve with user input - path traversal"
+    language: javascript
+
+  # SSRF (CWE-918)
+  - name: fetch
+    pattern: "\\bfetch\\("
+    callee_pattern: "^fetch$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "fetch API - SSRF if URL is user-controlled"
+    language: javascript
+
+  - name: axios_get
+    pattern: "axios\\.(get|post|put|delete|patch)\\("
+    callee_pattern: "^(get|post|put|delete|patch)$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "Axios HTTP client - SSRF risk"
+    language: javascript
+
+  - name: axios_request
+    pattern: "axios\\("
+    callee_pattern: "^axios$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "Axios HTTP client - SSRF risk"
+    language: javascript
+
+  - name: http_request
+    pattern: "(http|https)\\.request\\("
+    callee_pattern: "^request$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "Node.js http.request - SSRF risk"
+    language: javascript
+
+  - name: got
+    pattern: "\\bgot\\("
+    callee_pattern: "^got$"
+    type: URL_FETCH
+    confidence: 0.85
+    cwe_types: [CWE-918]
+    description: "Got HTTP client - SSRF risk"
+    language: javascript
+
+  # Redirect (CWE-601)
+  - name: res_redirect
+    pattern: "\\.redirect\\("
+    callee_pattern: "^redirect$"
+    type: REDIRECT
+    confidence: 0.85
+    cwe_types: [CWE-601]
+    description: "Express res.redirect - open redirect risk"
+    language: javascript
+
+  - name: window_location
+    pattern: "window\\.location\\s*="
+    type: REDIRECT
+    confidence: 0.90
+    cwe_types: [CWE-601]
+    description: "window.location assignment - open redirect"
+    language: javascript
+
+  - name: location_href
+    pattern: "location\\.href\\s*="
+    type: REDIRECT
+    confidence: 0.90
+    cwe_types: [CWE-601]
+    description: "location.href assignment - open redirect"
+    language: javascript
+
+  # Deserialization (CWE-502)
+  - name: json_parse
+    pattern: "JSON\\.parse\\("
+    callee_pattern: "^parse$"
+    type: DESERIALIZE
+    confidence: 0.70
+    cwe_types: [CWE-502]
+    description: "JSON.parse - usually safe but can enable prototype pollution"
+    language: javascript
+
+  - name: yaml_load
+    pattern: "yaml\\.(load|safeLoad)\\("
+    callee_pattern: "^(load|safeLoad)$"
+    type: DESERIALIZE
+    confidence: 0.85
+    cwe_types: [CWE-502]
+    description: "YAML parsing - deserialization risk"
+    language: javascript
+
+  # NoSQL Injection
+  - name: mongo_find
+    pattern: "\\.(find|findOne|findOneAndUpdate|findOneAndDelete)\\("
+    callee_pattern: "^(find|findOne|findOneAndUpdate|findOneAndDelete)$"
+    type: SQL_QUERY
+    confidence: 0.80
+    cwe_types: [CWE-943]
+    description: "MongoDB query - NoSQL injection if query is user-controlled"
+    language: javascript
+
+  - name: mongo_aggregate
+    pattern: "\\.aggregate\\("
+    callee_pattern: "^aggregate$"
+    type: SQL_QUERY
+    confidence: 0.80
+    cwe_types: [CWE-943]
+    description: "MongoDB aggregation - NoSQL injection risk"
+    language: javascript

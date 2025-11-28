@@ -1,0 +1,161 @@
+# Python Source Rules
+# These patterns identify user-controlled input in Python applications.
+
+sources:
+  # Flask Request Sources
+  - name: flask_form
+    pattern: "request\\.form(\\[['\"].*['\"]\\])?"
+    type: FLASK_REQUEST
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-79]
+    description: "Flask request.form - POST form data"
+    language: python
+
+  - name: flask_args
+    pattern: "request\\.args(\\[['\"].*['\"]\\])?"
+    type: FLASK_REQUEST
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-918]
+    description: "Flask request.args - query parameters"
+    language: python
+
+  - name: flask_json
+    pattern: "request\\.json(\\[['\"].*['\"]\\])?"
+    type: FLASK_REQUEST
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78]
+    description: "Flask request.json - JSON body"
+    language: python
+
+  - name: flask_values
+    pattern: "request\\.values(\\[['\"].*['\"]\\])?"
+    type: FLASK_REQUEST
+    confidence: 0.90
+    cwe_types: [CWE-89, CWE-78, CWE-79]
+    description: "Flask request.values - combined form/args"
+    language: python
+
+  - name: flask_data
+    pattern: "request\\.data"
+    type: FLASK_REQUEST
+    confidence: 0.90
+    cwe_types: [CWE-89, CWE-78]
+    description: "Flask request.data - raw request body"
+    language: python
+
+  - name: flask_cookies
+    pattern: "request\\.cookies(\\[['\"].*['\"]\\])?"
+    type: REQUEST_COOKIES
+    confidence: 0.85
+    cwe_types: [CWE-79]
+    description: "Flask request.cookies"
+    language: python
+
+  - name: flask_headers
+    pattern: "request\\.headers(\\[['\"].*['\"]\\])?"
+    type: REQUEST_HEADERS
+    confidence: 0.85
+    cwe_types: [CWE-79]
+    description: "Flask request.headers"
+    language: python
+
+  - name: flask_files
+    pattern: "request\\.files(\\[['\"].*['\"]\\])?"
+    type: FILE_INPUT
+    confidence: 0.90
+    cwe_types: [CWE-22, CWE-434]
+    description: "Flask file uploads"
+    language: python
+
+  # Django Request Sources
+  - name: django_GET
+    pattern: "request\\.GET(\\[['\"].*['\"]\\])?"
+    type: DJANGO_REQUEST
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-918]
+    description: "Django request.GET - query parameters"
+    language: python
+
+  - name: django_POST
+    pattern: "request\\.POST(\\[['\"].*['\"]\\])?"
+    type: DJANGO_REQUEST
+    confidence: 0.95
+    cwe_types: [CWE-89, CWE-78, CWE-79]
+    description: "Django request.POST - POST form data"
+    language: python
+
+  - name: django_body
+    pattern: "request\\.body"
+    type: DJANGO_REQUEST
+    confidence: 0.90
+    cwe_types: [CWE-89, CWE-78]
+    description: "Django request.body - raw request body"
+    language: python
+
+  - name: django_FILES
+    pattern: "request\\.FILES(\\[['\"].*['\"]\\])?"
+    type: FILE_INPUT
+    confidence: 0.90
+    cwe_types: [CWE-22, CWE-434]
+    description: "Django file uploads"
+    language: python
+
+  # Environment Variables
+  - name: os_environ
+    pattern: "os\\.environ(\\[['\"].*['\"]\\])?"
+    type: ENVIRONMENT
+    confidence: 0.80
+    cwe_types: [CWE-78]
+    description: "os.environ - environment variables"
+    language: python
+
+  - name: os_getenv
+    pattern: "os\\.getenv\\("
+    type: ENVIRONMENT
+    confidence: 0.80
+    cwe_types: [CWE-78]
+    description: "os.getenv() - environment variable"
+    language: python
+
+  # Command Line Arguments
+  - name: sys_argv
+    pattern: "sys\\.argv(\\[\\d+\\])?"
+    type: USER_INPUT
+    confidence: 0.90
+    cwe_types: [CWE-78, CWE-22]
+    description: "sys.argv - command line arguments"
+    language: python
+
+  # Standard Input
+  - name: input_func
+    pattern: "\\binput\\("
+    type: USER_INPUT
+    confidence: 0.85
+    cwe_types: [CWE-78, CWE-79]
+    description: "input() - user keyboard input"
+    language: python
+
+  # FastAPI Sources
+  - name: fastapi_body
+    pattern: "(body|Body)\\("
+    type: USER_INPUT
+    confidence: 0.85
+    cwe_types: [CWE-89, CWE-78]
+    description: "FastAPI Body parameter"
+    language: python
+
+  - name: fastapi_query
+    pattern: "(query|Query)\\("
+    type: USER_INPUT
+    confidence: 0.85
+    cwe_types: [CWE-89, CWE-78, CWE-918]
+    description: "FastAPI Query parameter"
+    language: python
+
+  - name: fastapi_path
+    pattern: "(path|Path)\\("
+    type: USER_INPUT
+    confidence: 0.90
+    cwe_types: [CWE-89, CWE-78, CWE-22]
+    description: "FastAPI Path parameter"
+    language: python
