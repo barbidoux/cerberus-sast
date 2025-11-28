@@ -1,0 +1,114 @@
+# Cerberus SAST Project Configuration
+# Copy this file to .cerberus.yml in your project root
+#
+# Configuration priority (highest to lowest):
+# 1. Environment variables (CERBERUS_LLM__ANTHROPIC__API_KEY, etc.)
+# 2. Project config (.cerberus.yml in project root)
+# 3. User config (~/.cerberus/config.yml)
+# 4. Default values
+
+# Project metadata
+project_name: "my-project"
+version: "1.0"
+
+# LLM Configuration
+llm:
+  # Provider priority: ollama (local) -> anthropic -> openai
+  default_provider: anthropic  # Options: ollama, anthropic, openai
+
+  # Ollama (local LLM - recommended for privacy/cost)
+  ollama:
+    base_url: "http://localhost:11434"
+    model: "deepseek-coder-v2:16b-lite-instruct-q4_K_M"
+    timeout: 120
+    context_length: 32768
+
+  # Anthropic Claude (cloud - best accuracy)
+  anthropic:
+    # api_key: null  # Set via CERBERUS_LLM__ANTHROPIC__API_KEY env var
+    model: "claude-sonnet-4-20250514"
+    timeout: 60
+    max_tokens: 4096
+
+  # OpenAI (cloud - fallback)
+  openai:
+    # api_key: null  # Set via CERBERUS_LLM__OPENAI__API_KEY env var
+    model: "gpt-4-turbo"
+    timeout: 60
+    max_tokens: 4096
+
+  # Retry settings
+  retry_max_attempts: 3
+  retry_backoff_factor: 2.0
+
+  # Response caching
+  cache_enabled: true
+  cache_ttl: 3600  # 1 hour
+
+# Joern CPG Configuration
+joern:
+  endpoint: "localhost:8080"
+  workspace: "./.cerberus/workspace"
+  timeout: 300
+  auto_start: false  # Set true if using Docker
+
+# Verification Configuration (Phase IV)
+verification:
+  enabled: true
+  council_mode: true  # Multi-agent verification for higher accuracy
+  confidence_threshold: 0.7
+  max_iterations: 3
+  timeout_per_finding: 60
+
+# Analysis Configuration
+analysis:
+  # Language detection
+  languages:
+    - auto  # Auto-detect, or specify: python, javascript, java, go, etc.
+
+  # Files/directories to exclude
+  exclude_patterns:
+    - "**/node_modules/**"
+    - "**/vendor/**"
+    - "**/.git/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/__pycache__/**"
+    - "**/*.min.js"
+    - "**/*.min.css"
+    - "**/migrations/**"
+    - "**/generated/**"
+
+  # File size limits
+  max_file_size_mb: 10
+  max_files: 10000
+
+# Reporting Configuration
+reporting:
+  # Output formats
+  formats:
+    - sarif   # For GitHub Security tab / IDE integration
+    - json    # Machine-readable
+    - html    # Human-readable report
+    - console # Terminal output
+
+  # Output location
+  output_dir: "./cerberus-results"
+
+  # Code snippets in reports
+  include_code_snippets: true
+  max_snippet_lines: 10
+
+# Logging Configuration
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  file: null   # Optional: "./cerberus.log"
+
+# Custom rules (advanced)
+# rules:
+#   additional_sources:
+#     - "CustomRequestHandler.get_body"
+#   additional_sinks:
+#     - "legacy_db.raw_execute"
+#   additional_sanitizers:
+#     - "security.sanitize_html"

@@ -207,7 +207,8 @@ class QueryGenerator:
     ) -> list[tuple]:
         """Get all relevant source-sink pairs.
 
-        Pairs sources and sinks that share vulnerability types.
+        Pairs sources and sinks. Uses sink's vulnerability types, or common
+        types if both have them, or a default if neither has them.
 
         Args:
             spec: Dynamic specification.
@@ -220,10 +221,28 @@ class QueryGenerator:
 
         for source in spec.sources:
             for sink in spec.sinks:
-                # Find common vulnerability types
-                common_vulns = set(source.vulnerability_types) & set(sink.vulnerability_types)
+                # Determine vulnerability types:
+                # 1. Use common types if both have them
+                # 2. Use sink's types if source has none
+                # 3. Use source's types if sink has none
+                # 4. Use a generic type if neither has any
+                source_vulns = set(source.vulnerability_types) if source.vulnerability_types else set()
+                sink_vulns = set(sink.vulnerability_types) if sink.vulnerability_types else set()
 
-                for vuln_type in common_vulns:
+                if source_vulns and sink_vulns:
+                    vuln_types = source_vulns & sink_vulns
+                    if not vuln_types:
+                        # No common types - use sink's types (more specific)
+                        vuln_types = sink_vulns
+                elif sink_vulns:
+                    vuln_types = sink_vulns
+                elif source_vulns:
+                    vuln_types = source_vulns
+                else:
+                    # Neither has types - use generic data flow
+                    vuln_types = {"DATA_FLOW"}
+
+                for vuln_type in vuln_types:
                     if include_sanitizers:
                         # Get sanitizers for this vulnerability type
                         sanitizers = [

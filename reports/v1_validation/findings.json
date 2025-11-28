@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "tool": {
+      "name": "Cerberus SAST",
+      "version": "1.0.0"
+    },
+    "scan": {
+      "id": "7d292826-306e-44bc-86a4-31e5fdec6239",
+      "repository": "cerberus-scan",
+      "status": "completed",
+      "started_at": "2025-11-28T06:06:13.317342+00:00",
+      "completed_at": "2025-11-28T06:06:13.428734+00:00",
+      "duration_seconds": 0.111392
+    },
+    "generated_at": "2025-11-28T06:06:13.432260+00:00"
+  },
+  "summary": {
+    "files_scanned": 4,
+    "lines_scanned": 662,
+    "total_findings": 0,
+    "by_severity": {},
+    "by_verdict": {
+      "true_positive": 0,
+      "false_positive": 0,
+      "uncertain": 0,
+      "unverified": 0
+    },
+    "spec_inference": {
+      "sources": 0,
+      "sinks": 0,
+      "sanitizers": 0
+    }
+  },
+  "findings": []
+}

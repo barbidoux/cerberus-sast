@@ -3,11 +3,25 @@
 **AI-Driven Static Application Security Testing with Neuro-Symbolic Pipeline**
 
 [![CI](https://github.com/cerberus-sast/cerberus/workflows/CI/badge.svg)](https://github.com/cerberus-sast/cerberus/actions)
-[![codecov](https://codecov.io/gh/cerberus-sast/cerberus/branch/main/graph/badge.svg)](https://codecov.io/gh/cerberus-sast/cerberus)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![V1 Validated](https://img.shields.io/badge/V1-Validated-green.svg)](reports/V1_VALIDATION_REPORT.md)
 
-Cerberus is a next-generation static application security testing (SAST) tool that combines the precision of Code Property Graph (CPG) analysis with the semantic understanding of Large Language Models (LLMs). It achieves **<5% false positive rates** through its innovative Neuro-Symbolic Self-Configuring Pipeline (NSSCP).
+Cerberus is a next-generation static application security testing (SAST) tool that combines the precision of Code Property Graph (CPG) analysis with the semantic understanding of Large Language Models (LLMs). It achieves high accuracy through its innovative **Neuro-Symbolic Self-Configuring Pipeline (NSSCP)**.
+
+## V1 Status: Validated
+
+Cerberus V1 has been validated on November 28, 2025. The system successfully detected **18 vulnerabilities** in a deliberately vulnerable Python application:
+
+| Metric | Value |
+|--------|-------|
+| Files Scanned | 4 |
+| Lines Analyzed | 662 |
+| Findings | 18 (12 CRITICAL, 6 HIGH) |
+| Scan Duration | ~31 seconds |
+| Vulnerability Types | CWE-78, CWE-89, CWE-94, CWE-22 |
+
+See the full [V1 Validation Report](reports/V1_VALIDATION_REPORT.md) for details.
 
 ## Key Features
 
@@ -15,7 +29,7 @@ Cerberus is a next-generation static application security testing (SAST) tool th
 - **Neuro-Symbolic Analysis**: Combines LLM reasoning with CPG graph precision
 - **Multi-Agent Verification**: Attacker/Defender/Judge council validates each finding
 - **Feedback Loop**: Verification results improve detection through iterative refinement
-- **Local-First**: Runs entirely on local infrastructure for data sovereignty
+- **Local-First**: Runs entirely on local infrastructure (Ollama) for data sovereignty
 - **Multiple Output Formats**: JSON, SARIF 2.1.0, HTML, Markdown, Console
 
 ## Architecture
@@ -30,16 +44,16 @@ Phase I: Context          Phase II: Inference      Phase III: Detection    Phase
 | Repository  |    -->    |    Spec     |    -->    |   Hybrid    |    -->   |  Multi-Agent|
 |   Mapper    |           |  Inference  |           |   Engine    |          |   Council   |
 +-------------+           +-------------+           +-------------+          +-------------+
-                                ^                                                   |
-                                |                                                   |
-                                +<---------  Feedback Loop  <-----------------------+
+                               ^                                                   |
+                               |                                                   |
+                               +<---------  Feedback Loop  <-----------------------+
 ```
 
 | Phase | Function | Technology |
 |-------|----------|------------|
 | I. Context | Structural map of codebase | Tree-sitter, PageRank |
-| II. Inference | Identify Sources/Sinks/Sanitizers | LLM (Qwen/DeepSeek), Joern |
-| III. Detection | Taint analysis via CPG queries | Joern (CPGQL) |
+| II. Inference | Identify Sources/Sinks/Sanitizers | LLM (DeepSeek/Qwen), Few-Shot CoT |
+| III. Detection | Taint analysis via CPG queries | Joern v4.0.450 (CPGQL) |
 | IV. Verification | Filter false positives | Multi-Agent Council |
 
 ## Quick Start
@@ -47,10 +61,7 @@ Phase I: Context          Phase II: Inference      Phase III: Detection    Phase
 ### Installation
 
 ```bash
-# Install from PyPI
-pip install cerberus-sast
-
-# Or install from source
+# Install from source
 git clone https://github.com/cerberus-sast/cerberus
 cd cerberus
 pip install -e ".[dev]"
@@ -59,11 +70,33 @@ pip install -e ".[dev]"
 ### Start Joern Server
 
 ```bash
-# Using Docker (recommended)
+# Using Docker (recommended for CI/CD)
 docker-compose -f docker-compose.joern.yml up -d
 
-# Or run Joern directly
-joern --server --server-host 0.0.0.0 --server-port 8080
+# Or run Joern directly (native installation)
+export JAVA_HOME=/path/to/jdk-17
+./joern --server --server-host 0.0.0.0 --server-port 8080
+```
+
+### Configure Cerberus
+
+Create `~/.cerberus/config.yml`:
+
+```yaml
+llm:
+  default_provider: ollama
+  ollama:
+    base_url: "http://localhost:11434"
+    model: "deepseek-coder-v2:16b-lite-instruct-q4_K_M"
+    timeout: 120
+
+joern:
+  endpoint: "localhost:8080"
+  timeout: 300
+
+verification:
+  enabled: true
+  confidence_threshold: 0.7
 ```
 
 ### Run a Scan
@@ -72,167 +105,171 @@ joern --server --server-host 0.0.0.0 --server-port 8080
 # Basic scan
 cerberus scan /path/to/repository
 
-# With specific output format
-cerberus scan /path/to/repository --output sarif --output-file results.sarif
+# With specific output formats
+cerberus scan /path/to/repository --format sarif --format json --output-dir ./results
 
-# With verification (requires LLM)
-cerberus scan /path/to/repository --verify --llm-provider ollama
-
-# Scan specific languages
-cerberus scan /path/to/repository --languages python javascript
+# Scan with minimum severity filter
+cerberus scan /path/to/repository --min-severity HIGH
 ```
 
-### Using the API
+### Example Output
 
-```bash
-# Start the API server
-cerberus api --host 0.0.0.0 --port 8000
-
-# Or using Docker
-docker-compose up -d
 ```
+╔═════════════════════════════════════════════════════════════════════╗
+║   ██████╗███████╗██████╗ ██████╗ ███████╗██████╗ ██╗   ██╗███████╗  ║
+║  ██╔════╝██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██║   ██║██╔════╝  ║
+║  ██║     █████╗  ██████╔╝██████╔╝█████╗  ██████╔╝██║   ██║███████╗  ║
+║  ██║     ██╔══╝  ██╔══██╗██╔══██╗██╔══╝  ██╔══██╗██║   ██║╚════██║  ║
+║  ╚██████╗███████╗██║  ██║██████╔╝███████╗██║  ██║╚██████╔╝███████║  ║
+║   ╚═════╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝  ║
+║                                                                     ║
+║  Neuro-Symbolic Self-Configuring Security Scanner                   ║
+╚═════════════════════════════════════════════════════════════════════╝
 
-Then access the API at `http://localhost:8000`:
-
-```bash
-# Start a scan
-curl -X POST http://localhost:8000/scans \
-  -H "Content-Type: application/json" \
-  -d '{"repository_path": "/path/to/repo"}'
-
-# Check status
-curl http://localhost:8000/scans/{scan_id}
-
-# Get findings
-curl http://localhost:8000/scans/{scan_id}/findings
+Findings: 18
+┏━━━━━━━━━━┳━━━━━━━┓
+┃ Severity ┃ Count ┃
+┡━━━━━━━━━━╇━━━━━━━┩
+│ CRITICAL │ 12    │
+│ HIGH     │ 6     │
+└──────────┴───────┘
 ```
 
 ## Configuration
 
-Create a `.cerberus.yml` in your project root:
+### Configuration Hierarchy
+
+1. Environment variables (`CERBERUS_LLM__ANTHROPIC__API_KEY`)
+2. Project config (`.cerberus.yml` in project root)
+3. User config (`~/.cerberus/config.yml`)
+4. Default values
+
+### Full Configuration Example
+
+See [examples/cerberus.example.yml](examples/cerberus.example.yml) for a complete configuration template.
 
 ```yaml
-# Languages to scan (auto-detected if not specified)
-languages:
-  - python
-  - javascript
-  - java
+# .cerberus.yml
+project_name: "my-project"
 
-# Patterns to exclude
-exclude:
-  - "**/node_modules/**"
-  - "**/venv/**"
-  - "**/.git/**"
+llm:
+  default_provider: ollama  # ollama, anthropic, openai
+  ollama:
+    base_url: "http://localhost:11434"
+    model: "deepseek-coder-v2:16b-lite-instruct-q4_K_M"
 
-# Verification settings
+joern:
+  endpoint: "localhost:8080"
+  timeout: 300
+
 verification:
   enabled: true
-  min_confidence: 0.7
+  council_mode: true
+  confidence_threshold: 0.7
+  max_iterations: 3
 
-# Feedback loop settings
-feedback:
-  enabled: true
-  max_iterations: 3  # Hard limit to prevent infinite loops
+analysis:
+  languages:
+    - auto
+  exclude_patterns:
+    - "**/node_modules/**"
+    - "**/vendor/**"
+    - "**/.git/**"
 
-# LLM provider configuration
-llm:
-  provider: ollama  # ollama, anthropic, openai
-  model: qwen2.5-coder:14b
-
-# Output settings
-output:
+reporting:
   formats:
-    - json
     - sarif
-  min_severity: medium
+    - json
+    - html
+  output_dir: "./cerberus-results"
 ```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+Add `ANTHROPIC_API_KEY` to your repository secrets, then use the workflow:
+
+```yaml
+# .github/workflows/security.yml
+name: Security Scan
+on: [push, pull_request]
+
+jobs:
+  cerberus:
+    runs-on: ubuntu-latest
+    services:
+      joern:
+        image: joernio/joern:latest
+        ports: ["8080:8080"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install cerberus-sast
+      - run: cerberus scan . --format sarif --output-dir ./results
+        env:
+          CERBERUS_LLM__ANTHROPIC__API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ./results/cerberus-results.sarif
+```
+
+See [.github/workflows/cerberus-scan.yml](.github/workflows/cerberus-scan.yml) for a complete workflow.
+
+### GitLab CI
+
+See [.gitlab-ci.example.yml](.gitlab-ci.example.yml) for GitLab CI configuration.
 
 ## Output Formats
 
-### SARIF (Static Analysis Results Interchange Format)
+| Format | Use Case | Command |
+|--------|----------|---------|
+| SARIF | IDE integration, GitHub Security | `--format sarif` |
+| JSON | Programmatic processing | `--format json` |
+| HTML | Human-readable reports | `--format html` |
+| Markdown | PR comments, documentation | `--format markdown` |
+| Console | Terminal output | (default) |
 
-Standard format for IDE integration and CI/CD pipelines:
+## Supported Vulnerability Types
 
-```bash
-cerberus scan /repo --output sarif --output-file results.sarif
-```
+| CWE | Name | Severity |
+|-----|------|----------|
+| CWE-78 | OS Command Injection | CRITICAL |
+| CWE-89 | SQL Injection | HIGH |
+| CWE-94 | Code Injection | CRITICAL |
+| CWE-22 | Path Traversal | HIGH |
 
-### JSON
+## Hardware Requirements
 
-Detailed JSON output with full trace information:
+| Configuration | RAM | GPU VRAM | Notes |
+|---------------|-----|----------|-------|
+| Minimum | 32GB | 12GB | RTX 4070, 4-bit 14B models |
+| Recommended | 64GB | 24GB | RTX 3090/4090, DeepSeek Coder V2 |
+| Optimal | 128GB | 48GB+ | Apple M2/M3 Ultra or dual-GPU |
 
-```bash
-cerberus scan /repo --output json --output-file results.json
-```
+## Supported Languages
 
-### HTML
+Currently validated:
+- Python
 
-Interactive HTML report with styling:
-
-```bash
-cerberus scan /repo --output html --output-file report.html
-```
-
-### Markdown
-
-GitHub-flavored markdown for PR comments:
-
-```bash
-cerberus scan /repo --output markdown --output-file report.md
-```
-
-## Baseline Management
-
-Track and compare findings across scans:
-
-```bash
-# Create a baseline from a scan
-cerberus baseline create --name v1.0 --scan-id abc123
-
-# Compare new scan against baseline
-cerberus baseline compare --name v1.0 --scan-id def456
-
-# List baselines
-cerberus baseline list
-```
-
-## Docker Deployment
-
-### Full Stack
-
-```bash
-# Start Cerberus API + Joern
-docker-compose up -d
-
-# With Ollama for local LLM
-docker-compose --profile llm up -d
-```
-
-### Joern Only
-
-```bash
-# For development with native Cerberus
-docker-compose -f docker-compose.joern.yml up -d
-```
+Planned support:
+- JavaScript/TypeScript
+- Java
+- Go
+- C/C++
 
 ## Development
 
 ### Setup
 
 ```bash
-# Clone repository
 git clone https://github.com/cerberus-sast/cerberus
 cd cerberus
-
-# Create virtual environment
 python -m venv .venv
 source .venv/bin/activate
-
-# Install with dev dependencies
 pip install -e ".[dev]"
-
-# Start Joern for testing
-docker-compose -f docker-compose.joern.yml up -d
 ```
 
 ### Running Tests
@@ -244,9 +281,6 @@ pytest
 # With coverage
 pytest --cov=cerberus
 
-# Specific module
-pytest tests/test_detection/
-
 # Integration tests (requires Joern)
 pytest -m integration
 ```
@@ -254,46 +288,21 @@ pytest -m integration
 ### Code Quality
 
 ```bash
-# Format code
 black cerberus tests
-
-# Lint
 ruff check cerberus tests
-
-# Type check
 mypy cerberus
 ```
 
-## Hardware Requirements
+## Documentation
 
-| Configuration | RAM | GPU VRAM | Notes |
-|---------------|-----|----------|-------|
-| Minimum | 32GB | 12GB | RTX 4070, 4-bit 14B models |
-| Recommended | 64GB | 24GB | RTX 3090/4090, Qwen 2.5 Coder 32B |
-| Optimal | 128GB | 48GB+ | Apple M2/M3 Ultra or dual-GPU |
-
-## Supported Languages
-
-- Python
-- JavaScript/TypeScript
-- Java
-- Go
-- C/C++
-- PHP
-- Ruby
-- Rust
+- [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and component details
+- [SPECIFICATIONS.md](SPECIFICATIONS.md) - Research and theoretical foundations
+- [V1 Validation Report](reports/V1_VALIDATION_REPORT.md) - V1 test results
+- [Test Report](reports/TEST_REPORT.md) - Detailed test analysis
 
 ## Contributing
 
 Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run tests (`pytest`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
 
 ## License
 
@@ -304,3 +313,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Joern](https://joern.io/) - Code Property Graph analysis
 - [Tree-sitter](https://tree-sitter.github.io/) - Incremental parsing
 - [Ollama](https://ollama.ai/) - Local LLM inference
+- [DeepSeek](https://www.deepseek.com/) - DeepSeek Coder V2 model

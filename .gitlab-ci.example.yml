@@ -1,0 +1,177 @@
+# Cerberus SAST - GitLab CI Example Configuration
+# Copy this file to .gitlab-ci.yml in your project root
+#
+# Required CI/CD Variables:
+#   - ANTHROPIC_API_KEY: API key for Anthropic Claude (or use Ollama)
+#
+# Optional Variables:
+#   - CERBERUS_SEVERITY_THRESHOLD: Minimum severity (default: HIGH)
+#   - CERBERUS_TARGET_PATH: Path to scan (default: .)
+
+stages:
+  - test
+  - security
+
+variables:
+  PYTHON_VERSION: "3.12"
+  CERBERUS_OUTPUT_DIR: "./cerberus-results"
+
+# Template for Cerberus scanning
+.cerberus_scan:
+  image: python:${PYTHON_VERSION}
+  services:
+    - name: joernio/joern:latest
+      alias: joern
+  before_script:
+    - pip install --upgrade pip
+    - pip install cerberus-sast
+    - |
+      # Wait for Joern to be ready
+      echo "Waiting for Joern server..."
+      for i in $(seq 1 60); do
+        if curl -sf http://joern:8080/; then
+          echo "Joern is ready!"
+          break
+        fi
+        sleep 5
+      done
+    - |
+      # Create config file
+      mkdir -p ~/.cerberus
+      cat > ~/.cerberus/config.yml << EOF
+      llm:
+        default_provider: anthropic
+        anthropic:
+          model: "claude-sonnet-4-20250514"
+          timeout: 60
+          max_tokens: 4096
+        cache_enabled: true
+        cache_ttl: 3600
+      joern:
+        endpoint: "joern:8080"
+        timeout: 300
+        auto_start: false
+      verification:
+        enabled: true
+        council_mode: false
+        confidence_threshold: 0.7
+      analysis:
+        languages:
+          - auto
+        exclude_patterns:
+          - "**/node_modules/**"
+          - "**/vendor/**"
+          - "**/.git/**"
+          - "**/dist/**"
+          - "**/build/**"
+        max_file_size_mb: 5
+      reporting:
+        formats:
+          - sarif
+          - json
+        output_dir: "${CERBERUS_OUTPUT_DIR}"
+      EOF
+  artifacts:
+    paths:
+      - ${CERBERUS_OUTPUT_DIR}/
+    reports:
+      sast: ${CERBERUS_OUTPUT_DIR}/cerberus-results.sarif
+    expire_in: 30 days
+    when: always
+
+# Main security scan job
+cerberus_sast:
+  extends: .cerberus_scan
+  stage: security
+  script:
+    - |
+      TARGET="${CERBERUS_TARGET_PATH:-.}"
+      SEVERITY="${CERBERUS_SEVERITY_THRESHOLD:-HIGH}"
+      echo "Scanning: $TARGET (min severity: $SEVERITY)"
+
+      cerberus scan "$TARGET" \
+        --output-dir ${CERBERUS_OUTPUT_DIR} \
+        --format sarif \
+        --format json \
+        --min-severity $SEVERITY || true
+
+      # Check for critical findings
+      if [ -f "${CERBERUS_OUTPUT_DIR}/cerberus-results.json" ]; then
+        CRITICAL=$(cat ${CERBERUS_OUTPUT_DIR}/cerberus-results.json | python3 -c "
+      import json, sys
+      data = json.load(sys.stdin)
+      critical = [f for f in data.get('findings', []) if f.get('severity') == 'CRITICAL']
+      print(len(critical))
+      " 2>/dev/null || echo "0")
+
+        echo "Found $CRITICAL CRITICAL findings"
+        if [ "$CRITICAL" -gt 0 ]; then
+          echo "CRITICAL vulnerabilities detected!"
+          exit 1
+        fi
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  allow_failure: false
+
+# Scheduled full scan (weekly)
+cerberus_full_scan:
+  extends: .cerberus_scan
+  stage: security
+  script:
+    - |
+      cerberus scan . \
+        --output-dir ${CERBERUS_OUTPUT_DIR} \
+        --format sarif \
+        --format json \
+        --format html \
+        --min-severity LOW
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  allow_failure: true
+
+# Self-hosted Ollama variant (for on-premise)
+cerberus_sast_ollama:
+  extends: .cerberus_scan
+  stage: security
+  before_script:
+    - pip install --upgrade pip
+    - pip install cerberus-sast
+    - |
+      mkdir -p ~/.cerberus
+      cat > ~/.cerberus/config.yml << EOF
+      llm:
+        default_provider: ollama
+        ollama:
+          base_url: "${OLLAMA_BASE_URL:-http://ollama:11434}"
+          model: "${OLLAMA_MODEL:-deepseek-coder-v2:16b-lite-instruct-q4_K_M}"
+          timeout: 120
+          context_length: 32768
+      joern:
+        endpoint: "joern:8080"
+        timeout: 300
+      EOF
+  services:
+    - name: joernio/joern:latest
+      alias: joern
+    - name: ollama/ollama:latest
+      alias: ollama
+  script:
+    - |
+      # Wait for Ollama
+      for i in $(seq 1 30); do
+        if curl -sf http://ollama:11434/api/tags; then
+          break
+        fi
+        sleep 5
+      done
+
+      cerberus scan . \
+        --output-dir ${CERBERUS_OUTPUT_DIR} \
+        --format sarif
+  rules:
+    - if: $USE_OLLAMA == "true"
+  allow_failure: true

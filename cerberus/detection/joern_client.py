@@ -145,8 +145,9 @@ class JoernClient:
             True if server is reachable and ready.
         """
         try:
-            await self._http_get("/")
-            return True
+            # Use query endpoint with a simple test query since "/" returns 404
+            response = await self._http_post("/query", {"query": "1"})
+            return response.get("success", False) or "uuid" in response
         except Exception:
             return False
 
@@ -184,6 +185,10 @@ class JoernClient:
     async def query(self, cpgql: str) -> QueryResult:
         """Execute CPGQL query.
 
+        Joern's HTTP API is async:
+        1. POST /query returns {"success": true, "uuid": "..."}
+        2. GET /result/{uuid} returns {"success": true, "stdout": "..."}
+
         Args:
             cpgql: The CPGQL query string.
 
@@ -194,20 +199,59 @@ class JoernClient:
             JoernError: On connection or timeout errors.
         """
         try:
+            # Submit query and get UUID
             response = await self._http_post("/query", {"query": cpgql})
 
-            if response.get("success", False):
+            if not response.get("success", False) and "uuid" not in response:
+                return QueryResult(
+                    success=False,
+                    error=response.get("stderr", response.get("error", "Query submission failed")),
+                    metadata={"query": cpgql},
+                )
+
+            uuid = response.get("uuid")
+            if not uuid:
+                # Legacy synchronous API fallback
                 return QueryResult(
                     success=True,
                     data=response.get("stdout", ""),
                     metadata={"query": cpgql},
                 )
-            else:
-                return QueryResult(
-                    success=False,
-                    error=response.get("stderr", "Query failed"),
-                    metadata={"query": cpgql},
-                )
+
+            # Poll for result with timeout
+            poll_interval = 0.5  # seconds
+            max_polls = int(self.config.timeout / poll_interval)
+
+            for _ in range(max_polls):
+                await asyncio.sleep(poll_interval)
+
+                result = await self._http_get(f"/result/{uuid}")
+
+                # Check if result is ready (has stdout or stderr)
+                if "stdout" in result or "stderr" in result:
+                    stdout = result.get("stdout", "")
+                    stderr = result.get("stderr", "")
+
+                    # Check for errors in stderr
+                    if stderr and not stdout:
+                        return QueryResult(
+                            success=False,
+                            error=stderr,
+                            metadata={"query": cpgql, "uuid": uuid},
+                        )
+
+                    return QueryResult(
+                        success=True,
+                        data=stdout,
+                        metadata={"query": cpgql, "uuid": uuid},
+                    )
+
+            # Timeout
+            return QueryResult(
+                success=False,
+                error=f"Query timed out after {self.config.timeout}s",
+                metadata={"query": cpgql, "uuid": uuid},
+            )
 
         except TimeoutError as e:
             raise JoernError(f"Query timeout: {e}", query=cpgql)

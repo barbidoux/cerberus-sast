@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerberus SAST Report - vulnerable_app</title>
+    <style>
+:root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --text-primary: #eaeaea;
+    --text-secondary: #a8a8a8;
+    --accent: #0f3460;
+    --critical: #ff4757;
+    --high: #ff6b6b;
+    --medium: #ffa502;
+    --low: #7bed9f;
+    --success: #2ed573;
+    --border: #2a2a4a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.header {
+    background: var(--bg-secondary);
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--accent);
+}
+.header h1 { font-size: 2em; margin-bottom: 10px; }
+.header .meta { color: var(--text-secondary); }
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.stat-card {
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+.stat-card .value { font-size: 2em; font-weight: bold; }
+.stat-card .label { color: var(--text-secondary); }
+.severity-critical { color: var(--critical); }
+.severity-high { color: var(--high); }
+.severity-medium { color: var(--medium); }
+.severity-low { color: var(--low); }
+.verdict-true_positive { color: var(--critical); }
+.verdict-false_positive { color: var(--success); }
+.verdict-uncertain { color: var(--medium); }
+.finding {
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border-left: 4px solid var(--accent);
+}
+.finding.critical { border-left-color: var(--critical); }
+.finding.high { border-left-color: var(--high); }
+.finding.medium { border-left-color: var(--medium); }
+.finding.low { border-left-color: var(--low); }
+.finding-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.finding-header h3 { font-size: 1.1em; }
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+.badge.critical { background: var(--critical); }
+.badge.high { background: var(--high); }
+.badge.medium { background: var(--medium); color: var(--bg-primary); }
+.badge.low { background: var(--low); color: var(--bg-primary); }
+.trace { margin-top: 15px; }
+.trace-step {
+    padding: 10px;
+    background: var(--bg-primary);
+    margin: 5px 0;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+.trace-step .type { color: var(--text-secondary); }
+code {
+    background: var(--bg-primary);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+.footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        
+<div class="header">
+    <h1>Cerberus SAST Scan Report</h1>
+    <div class="meta">
+        <p><strong>Repository:</strong> vulnerable_app</p>
+        <p><strong>Scan ID:</strong> 2ea37a93-e527-4c63-8dc3-33e8659df730</p>
+        <p><strong>Status:</strong> <span class="severity-success">COMPLETED</span></p>
+        <p><strong>Duration:</strong> 30.57s</p>
+        <p><strong>Generated:</strong> 2025-11-28 06:44:02 UTC</p>
+    </div>
+</div>
+        
+<div class="summary">
+    <div class="stat-card">
+        <div class="value">4</div>
+        <div class="label">Files Scanned</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">662</div>
+        <div class="label">Lines Analyzed</div>
+    </div>
+    <div class="stat-card">
+        <div class="value severity-critical">18</div>
+        <div class="label">Critical/High</div>
+    </div>
+    <div class="stat-card">
+        <div class="value severity-medium">0</div>
+        <div class="label">Medium</div>
+    </div>
+    <div class="stat-card">
+        <div class="value severity-low">0</div>
+        <div class="label">Low</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">18</div>
+        <div class="label">Total Findings</div>
+    </div>
+</div>
+        <h2>Findings</h2>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>1. CWE-78</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-78 vulnerability detected. Data from &#x27;get_user&#x27; may flow to dangerous sink &#x27;run_command&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_user</code>
+        (tests/fixtures/vulnerable_app/app.py:44)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>run_command</code>
+        (tests/fixtures/vulnerable_app/utils.py:24)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/app.py:44</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:24</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>2. CWE-94</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-94 vulnerability detected. Data from &#x27;get_user&#x27; may flow to dangerous sink &#x27;evaluate&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_user</code>
+        (tests/fixtures/vulnerable_app/app.py:44)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>evaluate</code>
+        (tests/fixtures/vulnerable_app/utils.py:182)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/app.py:44</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:182</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>3. CWE-78</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-78 vulnerability detected. Data from &#x27;get_user&#x27; may flow to dangerous sink &#x27;execute_command&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_user</code>
+        (tests/fixtures/vulnerable_app/app.py:44)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>execute_command</code>
+        (tests/fixtures/vulnerable_app/app.py:231)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/app.py:44</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/app.py:231</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>4. CWE-94</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-94 vulnerability detected. Data from &#x27;get_user&#x27; may flow to dangerous sink &#x27;execute&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_user</code>
+        (tests/fixtures/vulnerable_app/app.py:44)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>execute</code>
+        (tests/fixtures/vulnerable_app/utils.py:188)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/app.py:44</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:188</div></div>
+    
+</div>
+
+<div class="finding high">
+    <div class="finding-header">
+        <h3>5. CWE-89</h3>
+        <div>
+            <span class="badge high">HIGH</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-89 vulnerability detected. Data from &#x27;get_user&#x27; may flow to dangerous sink &#x27;raw_query&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_user</code>
+        (tests/fixtures/vulnerable_app/app.py:44)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>raw_query</code>
+        (tests/fixtures/vulnerable_app/database.py:177)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/app.py:44</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/database.py:177</div></div>
+    
+</div>
+
+<div class="finding high">
+    <div class="finding-header">
+        <h3>6. CWE-22</h3>
+        <div>
+            <span class="badge high">HIGH</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-22 vulnerability detected. Data from &#x27;get_user&#x27; may flow to dangerous sink &#x27;write_file&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_user</code>
+        (tests/fixtures/vulnerable_app/app.py:44)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>write_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:83)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/app.py:44</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:83</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>7. CWE-78</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-78 vulnerability detected. Data from &#x27;get_users_sorted&#x27; may flow to dangerous sink &#x27;run_command&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_users_sorted</code>
+        (tests/fixtures/vulnerable_app/database.py:95)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>run_command</code>
+        (tests/fixtures/vulnerable_app/utils.py:24)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/database.py:95</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:24</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>8. CWE-94</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-94 vulnerability detected. Data from &#x27;get_users_sorted&#x27; may flow to dangerous sink &#x27;evaluate&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_users_sorted</code>
+        (tests/fixtures/vulnerable_app/database.py:95)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>evaluate</code>
+        (tests/fixtures/vulnerable_app/utils.py:182)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/database.py:95</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:182</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>9. CWE-78</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-78 vulnerability detected. Data from &#x27;get_users_sorted&#x27; may flow to dangerous sink &#x27;execute_command&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_users_sorted</code>
+        (tests/fixtures/vulnerable_app/database.py:95)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>execute_command</code>
+        (tests/fixtures/vulnerable_app/app.py:231)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/database.py:95</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/app.py:231</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>10. CWE-94</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-94 vulnerability detected. Data from &#x27;get_users_sorted&#x27; may flow to dangerous sink &#x27;execute&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_users_sorted</code>
+        (tests/fixtures/vulnerable_app/database.py:95)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>execute</code>
+        (tests/fixtures/vulnerable_app/utils.py:188)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/database.py:95</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:188</div></div>
+    
+</div>
+
+<div class="finding high">
+    <div class="finding-header">
+        <h3>11. CWE-89</h3>
+        <div>
+            <span class="badge high">HIGH</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-89 vulnerability detected. Data from &#x27;get_users_sorted&#x27; may flow to dangerous sink &#x27;raw_query&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_users_sorted</code>
+        (tests/fixtures/vulnerable_app/database.py:95)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>raw_query</code>
+        (tests/fixtures/vulnerable_app/database.py:177)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/database.py:95</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/database.py:177</div></div>
+    
+</div>
+
+<div class="finding high">
+    <div class="finding-header">
+        <h3>12. CWE-22</h3>
+        <div>
+            <span class="badge high">HIGH</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-22 vulnerability detected. Data from &#x27;get_users_sorted&#x27; may flow to dangerous sink &#x27;write_file&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>get_users_sorted</code>
+        (tests/fixtures/vulnerable_app/database.py:95)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>write_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:83)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/database.py:95</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:83</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>13. CWE-78</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-78 vulnerability detected. Data from &#x27;read_file&#x27; may flow to dangerous sink &#x27;run_command&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>read_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:76)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>run_command</code>
+        (tests/fixtures/vulnerable_app/utils.py:24)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/utils.py:76</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:24</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>14. CWE-94</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-94 vulnerability detected. Data from &#x27;read_file&#x27; may flow to dangerous sink &#x27;evaluate&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>read_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:76)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>evaluate</code>
+        (tests/fixtures/vulnerable_app/utils.py:182)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/utils.py:76</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:182</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>15. CWE-78</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-78 vulnerability detected. Data from &#x27;read_file&#x27; may flow to dangerous sink &#x27;execute_command&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>read_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:76)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>execute_command</code>
+        (tests/fixtures/vulnerable_app/app.py:231)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/utils.py:76</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/app.py:231</div></div>
+    
+</div>
+
+<div class="finding critical">
+    <div class="finding-header">
+        <h3>16. CWE-94</h3>
+        <div>
+            <span class="badge critical">CRITICAL</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-94 vulnerability detected. Data from &#x27;read_file&#x27; may flow to dangerous sink &#x27;execute&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>read_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:76)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>execute</code>
+        (tests/fixtures/vulnerable_app/utils.py:188)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/utils.py:76</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:188</div></div>
+    
+</div>
+
+<div class="finding high">
+    <div class="finding-header">
+        <h3>17. CWE-89</h3>
+        <div>
+            <span class="badge high">HIGH</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-89 vulnerability detected. Data from &#x27;read_file&#x27; may flow to dangerous sink &#x27;raw_query&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>read_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:76)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>raw_query</code>
+        (tests/fixtures/vulnerable_app/database.py:177)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/utils.py:76</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/database.py:177</div></div>
+    
+</div>
+
+<div class="finding high">
+    <div class="finding-header">
+        <h3>18. CWE-22</h3>
+        <div>
+            <span class="badge high">HIGH</span>
+            
+        </div>
+    </div>
+    <p>Potential CWE-22 vulnerability detected. Data from &#x27;read_file&#x27; may flow to dangerous sink &#x27;write_file&#x27; without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.</p>
+    <p style="margin-top: 10px;">
+        <strong>Source:</strong> <code>read_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:76)
+    </p>
+    <p>
+        <strong>Sink:</strong> <code>write_file</code>
+        (tests/fixtures/vulnerable_app/utils.py:83)
+    </p>
+    <div class="trace"><strong>Trace:</strong><div class="trace-step"><span class="type">source:</span> tests/fixtures/vulnerable_app/utils.py:76</div>
+<div class="trace-step"><span class="type">sink:</span> tests/fixtures/vulnerable_app/utils.py:83</div></div>
+    
+</div>
+        
+<div class="footer">
+    <p>Generated by Cerberus SAST v1.0.0</p>
+    <p>Neuro-Symbolic Self-Configuring Security Scanner</p>
+</div>
+    </div>
+</body>
+</html>

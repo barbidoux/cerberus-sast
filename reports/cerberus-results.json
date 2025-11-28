@@ -1,0 +1,651 @@
+{
+  "metadata": {
+    "tool": {
+      "name": "Cerberus SAST",
+      "version": "1.0.0"
+    },
+    "scan": {
+      "id": "2ea37a93-e527-4c63-8dc3-33e8659df730",
+      "repository": "vulnerable_app",
+      "status": "completed",
+      "started_at": "2025-11-28T06:43:32.391059+00:00",
+      "completed_at": "2025-11-28T06:44:02.957050+00:00",
+      "duration_seconds": 30.565991
+    },
+    "generated_at": "2025-11-28T06:44:02.958772+00:00"
+  },
+  "summary": {
+    "files_scanned": 4,
+    "lines_scanned": 662,
+    "total_findings": 18,
+    "by_severity": {
+      "critical": 12,
+      "high": 6
+    },
+    "by_verdict": {
+      "true_positive": 0,
+      "false_positive": 0,
+      "uncertain": 0,
+      "unverified": 18
+    },
+    "spec_inference": {
+      "sources": 3,
+      "sinks": 6,
+      "sanitizers": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "dfee90ac-093b-486e-9a8a-fe41557599c7",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential CWE-78 vulnerability detected. Data from 'get_user' may flow to dangerous sink 'run_command' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_user",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 44
+      },
+      "sink": {
+        "method": "run_command",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 24
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 44,
+          "column": 0,
+          "code": "Source: get_user",
+          "description": "Tainted data enters from get_user"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 24,
+          "column": 0,
+          "code": "Sink: run_command",
+          "description": "Tainted data reaches dangerous sink run_command"
+        }
+      ]
+    },
+    {
+      "id": "e7380990-6481-45ec-bdbb-f6b576b17f40",
+      "vulnerability_type": "CWE-94",
+      "severity": "critical",
+      "description": "Potential CWE-94 vulnerability detected. Data from 'get_user' may flow to dangerous sink 'evaluate' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_user",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 44
+      },
+      "sink": {
+        "method": "evaluate",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 182
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 44,
+          "column": 0,
+          "code": "Source: get_user",
+          "description": "Tainted data enters from get_user"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 182,
+          "column": 0,
+          "code": "Sink: evaluate",
+          "description": "Tainted data reaches dangerous sink evaluate"
+        }
+      ]
+    },
+    {
+      "id": "5fa7bd69-c4c2-4e49-a25d-4e99f8c125e8",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential CWE-78 vulnerability detected. Data from 'get_user' may flow to dangerous sink 'execute_command' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_user",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 44
+      },
+      "sink": {
+        "method": "execute_command",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 231
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 44,
+          "column": 0,
+          "code": "Source: get_user",
+          "description": "Tainted data enters from get_user"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 231,
+          "column": 0,
+          "code": "Sink: execute_command",
+          "description": "Tainted data reaches dangerous sink execute_command"
+        }
+      ]
+    },
+    {
+      "id": "d164ab59-092b-42ee-8100-8266fe6c44f1",
+      "vulnerability_type": "CWE-94",
+      "severity": "critical",
+      "description": "Potential CWE-94 vulnerability detected. Data from 'get_user' may flow to dangerous sink 'execute' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_user",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 44
+      },
+      "sink": {
+        "method": "execute",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 188
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 44,
+          "column": 0,
+          "code": "Source: get_user",
+          "description": "Tainted data enters from get_user"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 188,
+          "column": 0,
+          "code": "Sink: execute",
+          "description": "Tainted data reaches dangerous sink execute"
+        }
+      ]
+    },
+    {
+      "id": "1e4bda9d-65ee-47c0-abb9-381c8a5045f4",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential CWE-89 vulnerability detected. Data from 'get_user' may flow to dangerous sink 'raw_query' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_user",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 44
+      },
+      "sink": {
+        "method": "raw_query",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 177
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 44,
+          "column": 0,
+          "code": "Source: get_user",
+          "description": "Tainted data enters from get_user"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 177,
+          "column": 0,
+          "code": "Sink: raw_query",
+          "description": "Tainted data reaches dangerous sink raw_query"
+        }
+      ]
+    },
+    {
+      "id": "fecc4eba-2c80-4322-ba48-fb80563f2b37",
+      "vulnerability_type": "CWE-22",
+      "severity": "high",
+      "description": "Potential CWE-22 vulnerability detected. Data from 'get_user' may flow to dangerous sink 'write_file' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_user",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 44
+      },
+      "sink": {
+        "method": "write_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 83
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 44,
+          "column": 0,
+          "code": "Source: get_user",
+          "description": "Tainted data enters from get_user"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 83,
+          "column": 0,
+          "code": "Sink: write_file",
+          "description": "Tainted data reaches dangerous sink write_file"
+        }
+      ]
+    },
+    {
+      "id": "e08f692e-1767-432b-8370-7f34ac07e29c",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential CWE-78 vulnerability detected. Data from 'get_users_sorted' may flow to dangerous sink 'run_command' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_users_sorted",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 95
+      },
+      "sink": {
+        "method": "run_command",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 24
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 95,
+          "column": 0,
+          "code": "Source: get_users_sorted",
+          "description": "Tainted data enters from get_users_sorted"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 24,
+          "column": 0,
+          "code": "Sink: run_command",
+          "description": "Tainted data reaches dangerous sink run_command"
+        }
+      ]
+    },
+    {
+      "id": "dde119a2-a083-47c4-812d-38a8c723099d",
+      "vulnerability_type": "CWE-94",
+      "severity": "critical",
+      "description": "Potential CWE-94 vulnerability detected. Data from 'get_users_sorted' may flow to dangerous sink 'evaluate' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_users_sorted",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 95
+      },
+      "sink": {
+        "method": "evaluate",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 182
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 95,
+          "column": 0,
+          "code": "Source: get_users_sorted",
+          "description": "Tainted data enters from get_users_sorted"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 182,
+          "column": 0,
+          "code": "Sink: evaluate",
+          "description": "Tainted data reaches dangerous sink evaluate"
+        }
+      ]
+    },
+    {
+      "id": "627fd17b-bb8d-435a-8cdc-82e2612e8cbe",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential CWE-78 vulnerability detected. Data from 'get_users_sorted' may flow to dangerous sink 'execute_command' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_users_sorted",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 95
+      },
+      "sink": {
+        "method": "execute_command",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 231
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 95,
+          "column": 0,
+          "code": "Source: get_users_sorted",
+          "description": "Tainted data enters from get_users_sorted"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 231,
+          "column": 0,
+          "code": "Sink: execute_command",
+          "description": "Tainted data reaches dangerous sink execute_command"
+        }
+      ]
+    },
+    {
+      "id": "34db266d-f7d6-4f69-bb89-97f256e1e164",
+      "vulnerability_type": "CWE-94",
+      "severity": "critical",
+      "description": "Potential CWE-94 vulnerability detected. Data from 'get_users_sorted' may flow to dangerous sink 'execute' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_users_sorted",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 95
+      },
+      "sink": {
+        "method": "execute",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 188
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 95,
+          "column": 0,
+          "code": "Source: get_users_sorted",
+          "description": "Tainted data enters from get_users_sorted"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 188,
+          "column": 0,
+          "code": "Sink: execute",
+          "description": "Tainted data reaches dangerous sink execute"
+        }
+      ]
+    },
+    {
+      "id": "fdffaec7-c660-47d0-850c-eae61afa759b",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential CWE-89 vulnerability detected. Data from 'get_users_sorted' may flow to dangerous sink 'raw_query' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_users_sorted",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 95
+      },
+      "sink": {
+        "method": "raw_query",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 177
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 95,
+          "column": 0,
+          "code": "Source: get_users_sorted",
+          "description": "Tainted data enters from get_users_sorted"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 177,
+          "column": 0,
+          "code": "Sink: raw_query",
+          "description": "Tainted data reaches dangerous sink raw_query"
+        }
+      ]
+    },
+    {
+      "id": "d05d92ac-1b5c-4207-88bf-191a50a352bf",
+      "vulnerability_type": "CWE-22",
+      "severity": "high",
+      "description": "Potential CWE-22 vulnerability detected. Data from 'get_users_sorted' may flow to dangerous sink 'write_file' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "get_users_sorted",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 95
+      },
+      "sink": {
+        "method": "write_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 83
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 95,
+          "column": 0,
+          "code": "Source: get_users_sorted",
+          "description": "Tainted data enters from get_users_sorted"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 83,
+          "column": 0,
+          "code": "Sink: write_file",
+          "description": "Tainted data reaches dangerous sink write_file"
+        }
+      ]
+    },
+    {
+      "id": "afbe4c60-20c7-486c-a0e8-fb9f1cb448c9",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential CWE-78 vulnerability detected. Data from 'read_file' may flow to dangerous sink 'run_command' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "read_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 76
+      },
+      "sink": {
+        "method": "run_command",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 24
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 76,
+          "column": 0,
+          "code": "Source: read_file",
+          "description": "Tainted data enters from read_file"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 24,
+          "column": 0,
+          "code": "Sink: run_command",
+          "description": "Tainted data reaches dangerous sink run_command"
+        }
+      ]
+    },
+    {
+      "id": "d2f76080-f813-4a32-a2b1-9d66f19c69db",
+      "vulnerability_type": "CWE-94",
+      "severity": "critical",
+      "description": "Potential CWE-94 vulnerability detected. Data from 'read_file' may flow to dangerous sink 'evaluate' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "read_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 76
+      },
+      "sink": {
+        "method": "evaluate",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 182
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 76,
+          "column": 0,
+          "code": "Source: read_file",
+          "description": "Tainted data enters from read_file"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 182,
+          "column": 0,
+          "code": "Sink: evaluate",
+          "description": "Tainted data reaches dangerous sink evaluate"
+        }
+      ]
+    },
+    {
+      "id": "1e7f6f03-e1fe-4f0a-89a1-de561b827d4e",
+      "vulnerability_type": "CWE-78",
+      "severity": "critical",
+      "description": "Potential CWE-78 vulnerability detected. Data from 'read_file' may flow to dangerous sink 'execute_command' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "read_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 76
+      },
+      "sink": {
+        "method": "execute_command",
+        "file": "tests/fixtures/vulnerable_app/app.py",
+        "line": 231
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 76,
+          "column": 0,
+          "code": "Source: read_file",
+          "description": "Tainted data enters from read_file"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/app.py",
+          "line": 231,
+          "column": 0,
+          "code": "Sink: execute_command",
+          "description": "Tainted data reaches dangerous sink execute_command"
+        }
+      ]
+    },
+    {
+      "id": "18c10049-e30d-4ff0-90d3-1dd5b20bf8e1",
+      "vulnerability_type": "CWE-94",
+      "severity": "critical",
+      "description": "Potential CWE-94 vulnerability detected. Data from 'read_file' may flow to dangerous sink 'execute' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "read_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 76
+      },
+      "sink": {
+        "method": "execute",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 188
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 76,
+          "column": 0,
+          "code": "Source: read_file",
+          "description": "Tainted data enters from read_file"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 188,
+          "column": 0,
+          "code": "Sink: execute",
+          "description": "Tainted data reaches dangerous sink execute"
+        }
+      ]
+    },
+    {
+      "id": "4e1fb96c-93a0-4db7-a097-e513a00ae7d6",
+      "vulnerability_type": "CWE-89",
+      "severity": "high",
+      "description": "Potential CWE-89 vulnerability detected. Data from 'read_file' may flow to dangerous sink 'raw_query' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "read_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 76
+      },
+      "sink": {
+        "method": "raw_query",
+        "file": "tests/fixtures/vulnerable_app/database.py",
+        "line": 177
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 76,
+          "column": 0,
+          "code": "Source: read_file",
+          "description": "Tainted data enters from read_file"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/database.py",
+          "line": 177,
+          "column": 0,
+          "code": "Sink: raw_query",
+          "description": "Tainted data reaches dangerous sink raw_query"
+        }
+      ]
+    },
+    {
+      "id": "d721a04a-e07a-46e3-8e48-1e6b5263cb7d",
+      "vulnerability_type": "CWE-22",
+      "severity": "high",
+      "description": "Potential CWE-22 vulnerability detected. Data from 'read_file' may flow to dangerous sink 'write_file' without proper sanitization. This finding is based on LLM semantic analysis verified against the Code Property Graph.",
+      "source": {
+        "method": "read_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 76
+      },
+      "sink": {
+        "method": "write_file",
+        "file": "tests/fixtures/vulnerable_app/utils.py",
+        "line": 83
+      },
+      "trace": [
+        {
+          "step_type": "source",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 76,
+          "column": 0,
+          "code": "Source: read_file",
+          "description": "Tainted data enters from read_file"
+        },
+        {
+          "step_type": "sink",
+          "file": "tests/fixtures/vulnerable_app/utils.py",
+          "line": 83,
+          "column": 0,
+          "code": "Sink: write_file",
+          "description": "Tainted data reaches dangerous sink write_file"
+        }
+      ]
+    }
+  ]
+}

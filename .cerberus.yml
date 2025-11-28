@@ -1,0 +1,32 @@
+# Cerberus SAST V1 Validation Configuration
+project_name: "vulnerable_app_scan"
+
+llm:
+  default_provider: ollama
+  ollama:
+    base_url: "http://172.31.208.1:11434"
+    model: "deepseek-coder-v2:16b-lite-instruct-q4_K_M"
+    timeout: 300
+    context_length: 32768
+
+joern:
+  endpoint: "localhost:8080"
+  timeout: 300
+
+verification:
+  enabled: false
+  council_mode: false
+  max_iterations: 3
+  confidence_threshold: 0.7
+
+analysis:
+  languages:
+    - python
+  max_file_size_mb: 10
+
+reporting:
+  formats:
+    - json
+    - sarif
+  output_dir: "./reports/v1_validation"
+  include_code_snippets: true

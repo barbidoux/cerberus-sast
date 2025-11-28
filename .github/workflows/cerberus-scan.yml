@@ -1,0 +1,262 @@
+# Cerberus SAST - Security Scanning Workflow
+# This workflow runs Cerberus SAST on your codebase and uploads results to GitHub Security tab
+name: Cerberus Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run weekly on Sundays at midnight
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      target_path:
+        description: 'Path to scan (relative to repo root)'
+        required: false
+        default: '.'
+      severity_threshold:
+        description: 'Minimum severity to report (LOW, MEDIUM, HIGH, CRITICAL)'
+        required: false
+        default: 'HIGH'
+
+concurrency:
+  group: cerberus-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  cerberus-scan:
+    name: Cerberus SAST Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # Required for SARIF upload
+      actions: read
+
+    services:
+      joern:
+        image: joernio/joern:latest
+        ports:
+          - 8080:8080
+        options: >-
+          --health-cmd "curl -sf http://localhost:8080/ || exit 1"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 10
+          --health-start-period 120s
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better context
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Cerberus SAST
+        run: |
+          python -m pip install --upgrade pip
+          pip install cerberus-sast
+          # Or for development: pip install -e ".[dev]"
+
+      - name: Wait for Joern service
+        run: |
+          echo "Waiting for Joern server to be ready..."
+          timeout 180 bash -c 'until curl -sf http://localhost:8080/; do sleep 5; done'
+          echo "Joern server is ready!"
+
+      - name: Create Cerberus config
+        run: |
+          mkdir -p ~/.cerberus
+          cat > ~/.cerberus/config.yml << 'EOF'
+          # Cerberus CI Configuration
+          llm:
+            default_provider: anthropic
+            anthropic:
+              model: "claude-sonnet-4-20250514"
+              timeout: 60
+              max_tokens: 4096
+            retry_max_attempts: 3
+            retry_backoff_factor: 2.0
+            cache_enabled: true
+            cache_ttl: 3600
+
+          joern:
+            endpoint: "localhost:8080"
+            timeout: 300
+            auto_start: false
+
+          verification:
+            enabled: true
+            council_mode: false  # Single-agent for faster CI
+            confidence_threshold: 0.7
+            max_iterations: 2
+            timeout_per_finding: 30
+
+          analysis:
+            languages:
+              - auto
+            exclude_patterns:
+              - "**/node_modules/**"
+              - "**/vendor/**"
+              - "**/.git/**"
+              - "**/dist/**"
+              - "**/build/**"
+              - "**/__pycache__/**"
+              - "**/*.min.js"
+              - "**/*.min.css"
+              - "**/test/**"
+              - "**/tests/**"
+            max_file_size_mb: 5
+            max_files: 5000
+
+          reporting:
+            formats:
+              - sarif
+              - json
+            output_dir: "./cerberus-results"
+            include_code_snippets: true
+            max_snippet_lines: 10
+
+          logging:
+            level: INFO
+          EOF
+
+      - name: Run Cerberus scan
+        id: scan
+        run: |
+          TARGET_PATH="${{ github.event.inputs.target_path || '.' }}"
+          echo "Scanning: $TARGET_PATH"
+
+          cerberus scan "$TARGET_PATH" \
+            --output-dir ./cerberus-results \
+            --format sarif \
+            --format json \
+            --min-severity ${{ github.event.inputs.severity_threshold || 'HIGH' }}
+
+          # Check if findings were detected
+          if [ -f ./cerberus-results/cerberus-results.sarif ]; then
+            FINDING_COUNT=$(jq '.runs[0].results | length' ./cerberus-results/cerberus-results.sarif 2>/dev/null || echo "0")
+            echo "findings_count=$FINDING_COUNT" >> $GITHUB_OUTPUT
+            echo "Found $FINDING_COUNT security findings"
+          else
+            echo "findings_count=0" >> $GITHUB_OUTPUT
+            echo "No SARIF file generated"
+          fi
+        env:
+          CERBERUS_LLM__ANTHROPIC__API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CERBERUS_JOERN_ENDPOINT: localhost:8080
+        continue-on-error: true  # Don't fail the job if scan errors
+
+      - name: Upload SARIF to GitHub Security
+        if: always() && hashFiles('./cerberus-results/cerberus-results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ./cerberus-results/cerberus-results.sarif
+          category: cerberus-sast
+
+      - name: Upload scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerberus-results-${{ github.sha }}
+          path: |
+            ./cerberus-results/
+          retention-days: 30
+
+      - name: Post scan summary
+        if: always()
+        run: |
+          echo "## Cerberus SAST Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f ./cerberus-results/cerberus-results.json ]; then
+            CRITICAL=$(jq '[.findings[] | select(.severity == "CRITICAL")] | length' ./cerberus-results/cerberus-results.json 2>/dev/null || echo "0")
+            HIGH=$(jq '[.findings[] | select(.severity == "HIGH")] | length' ./cerberus-results/cerberus-results.json 2>/dev/null || echo "0")
+            MEDIUM=$(jq '[.findings[] | select(.severity == "MEDIUM")] | length' ./cerberus-results/cerberus-results.json 2>/dev/null || echo "0")
+            LOW=$(jq '[.findings[] | select(.severity == "LOW")] | length' ./cerberus-results/cerberus-results.json 2>/dev/null || echo "0")
+
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+            echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No results file found." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail on critical findings
+        if: steps.scan.outputs.findings_count > 0
+        run: |
+          if [ -f ./cerberus-results/cerberus-results.json ]; then
+            CRITICAL=$(jq '[.findings[] | select(.severity == "CRITICAL")] | length' ./cerberus-results/cerberus-results.json 2>/dev/null || echo "0")
+            if [ "$CRITICAL" -gt 0 ]; then
+              echo "::error::Found $CRITICAL CRITICAL severity findings!"
+              exit 1
+            fi
+          fi
+
+  # Optional: Ollama-based scanning (self-hosted runner with GPU)
+  cerberus-scan-ollama:
+    name: Cerberus SAST (Ollama)
+    runs-on: self-hosted  # Requires self-hosted runner with Ollama
+    if: github.event_name == 'workflow_dispatch'  # Only on manual trigger
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Cerberus
+        run: pip install cerberus-sast
+
+      - name: Verify Ollama is running
+        run: |
+          curl -sf http://localhost:11434/api/tags || {
+            echo "Ollama not running on localhost:11434"
+            exit 1
+          }
+
+      - name: Run scan with Ollama
+        run: |
+          cat > /tmp/cerberus-ollama.yml << 'EOF'
+          llm:
+            default_provider: ollama
+            ollama:
+              base_url: "http://localhost:11434"
+              model: "deepseek-coder-v2:16b-lite-instruct-q4_K_M"
+              timeout: 120
+              context_length: 32768
+          joern:
+            endpoint: "localhost:8080"
+            timeout: 300
+          EOF
+
+          cerberus scan . \
+            --config /tmp/cerberus-ollama.yml \
+            --output-dir ./cerberus-results \
+            --format sarif
+        env:
+          CERBERUS_JOERN_ENDPOINT: localhost:8080
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ./cerberus-results/cerberus-results.sarif
+          category: cerberus-sast-ollama

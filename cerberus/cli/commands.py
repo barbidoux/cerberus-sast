@@ -500,16 +500,20 @@ async def _run_scan(
 ) -> Any:
     """Run the scan pipeline with progress tracking."""
     from cerberus.core.orchestrator import OrchestratorResult
+    from cerberus.llm.gateway import LLMGateway
 
     # Configure orchestrator
     orchestrator_config = OrchestratorConfig(
         run_inference=True,
         run_detection=True,
         run_verification=not no_verify and council,
-        max_feedback_iterations=cfg.analysis.max_iterations if hasattr(cfg.analysis, 'max_iterations') else 3,
-        min_confidence=cfg.analysis.min_confidence if hasattr(cfg.analysis, 'min_confidence') else 0.5,
-        joern_endpoint=cfg.detection.joern_endpoint if hasattr(cfg.detection, 'joern_endpoint') else "http://localhost:9000",
+        max_feedback_iterations=cfg.verification.max_iterations if hasattr(cfg, 'verification') else 3,
+        min_confidence=cfg.verification.confidence_threshold if hasattr(cfg, 'verification') else 0.5,
+        joern_endpoint=f"http://{cfg.joern.endpoint}" if hasattr(cfg, 'joern') and cfg.joern else "http://localhost:8080",
     )
+
+    # Create LLM gateway from configuration
+    llm_gateway = LLMGateway(cfg.llm)
 
     # Create progress display
     if not quiet:
@@ -532,12 +536,13 @@ async def _run_scan(
 
             orchestrator = ScanOrchestrator(
                 config=orchestrator_config,
+                llm_gateway=llm_gateway,
                 progress_callback=progress_callback,
             )
 
             result = await orchestrator.scan(path, repository_name=cfg.project_name)
     else:
-        orchestrator = ScanOrchestrator(config=orchestrator_config)
+        orchestrator = ScanOrchestrator(config=orchestrator_config, llm_gateway=llm_gateway)
         result = await orchestrator.scan(path, repository_name=cfg.project_name)
 
     return result

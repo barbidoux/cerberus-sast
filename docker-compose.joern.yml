@@ -3,7 +3,7 @@
 
 services:
   joern:
-    image: joernio/joern:latest
+    image: ghcr.io/joernio/joern:nightly
     container_name: cerberus-joern
     ports:
       - "8080:8080"

@@ -125,8 +125,16 @@ class LLMClassifier:
             # Build the prompt
             target_label = candidate.candidate_type.to_taint_label()
 
-            # Get code from candidate signature if not provided
-            code = code_snippet or candidate.symbol.signature or f"def {candidate.symbol.name}():"
+            # Get code: prefer snippet, then extract from file, then signature fallback
+            code = code_snippet
+            if not code:
+                code = self._extract_function_source(
+                    candidate.symbol.file_path,
+                    candidate.symbol.line,
+                    candidate.symbol.name,
+                )
+            if not code:
+                code = candidate.symbol.signature or f"def {candidate.symbol.name}():"
 
             # Detect language from file extension
             language = self._detect_language(candidate.symbol.file_path)
@@ -329,3 +337,73 @@ class LLMClassifier:
             "rejected_count": 0,
             "error_count": 0,
         }
+
+    def _extract_function_source(
+        self,
+        file_path: Any,
+        start_line: int,
+        func_name: str,
+        max_lines: int = 50,
+    ) -> Optional[str]:
+        """
+        Extract function source code from file.
+
+        Args:
+            file_path: Path to the source file
+            start_line: Starting line number (1-indexed)
+            func_name: Function name for validation
+            max_lines: Maximum lines to extract
+
+        Returns:
+            Function source code or None if extraction fails
+        """
+        try:
+            from pathlib import Path
+            path = Path(file_path) if not isinstance(file_path, Path) else file_path
+
+            if not path.exists():
+                return None
+
+            with open(path, "r", encoding="utf-8", errors="replace") as f:
+                lines = f.readlines()
+
+            # Adjust to 0-indexed
+            start_idx = start_line - 1
+            if start_idx < 0 or start_idx >= len(lines):
+                return None
+
+            # Extract function with proper indentation handling
+            func_lines = []
+            base_indent = None
+
+            for i in range(start_idx, min(start_idx + max_lines, len(lines))):
+                line = lines[i]
+                stripped = line.lstrip()
+
+                # First line - get base indentation
+                if i == start_idx:
+                    base_indent = len(line) - len(stripped)
+                    func_lines.append(line.rstrip())
+                    continue
+
+                # Empty lines are ok
+                if not stripped:
+                    func_lines.append("")
+                    continue
+
+                # Check indentation - if back to base level, we're done
+                current_indent = len(line) - len(stripped)
+                if current_indent <= base_indent and stripped and not stripped.startswith("#"):
+                    # Check if this is a new function/class definition
+                    if stripped.startswith(("def ", "class ", "@")):
+                        break
+
+                func_lines.append(line.rstrip())
+
+            if func_lines:
+                return "\n".join(func_lines)
+
+            return None
+
+        except Exception:
+            return None
